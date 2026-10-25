@@ -29,6 +29,10 @@ pre{margin:0;white-space:pre-wrap;word-break:break-word;font:15px/1.9 ui-monospa
 .info{font-size:.85rem;color:var(--mut);margin-top:8px}
 .legend{font-size:.82rem;color:var(--mut)}
 button:disabled{opacity:.4;cursor:default}
+[hidden]{display:none!important}
+#upd{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));background:var(--ac);color:var(--acfg);padding:12px 14px;border-radius:12px;display:flex;gap:10px;align-items:center;z-index:50;box-shadow:0 4px 16px rgba(0,0,0,.3)}
+#upd button{background:var(--acfg);color:var(--ac);font-weight:600}
+#ver a{color:var(--ac)}
 </style>
 </head>
 <body>
@@ -72,7 +76,9 @@ button:disabled{opacity:.4;cursor:default}
 <div style="margin-top:12px"><button id="cp">Copy tabs</button></div>
 <div class="legend" style="margin-top:10px" id="lg"></div>
 </div>
+<div class="legend" id="ver" style="text-align:center;margin-top:24px">Version <span id="vnum"></span> &middot; <a href="#" id="chk">Check for updates</a><div id="vst" style="margin-top:4px"></div></div>
 </main>
+<div id="upd" hidden><span id="updt" style="flex:1">A new version is ready.</span><button id="updb" type="button">Update</button></div>
 
 <script>
 (function(){
@@ -419,6 +425,39 @@ this.textContent='Copied';var b=this;setTimeout(function(){b.textContent='Copy t
 });
 })();
 </script>
-<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+<script>
+(function(){
+var APP_VERSION='1.4';
+document.getElementById('vnum').textContent=APP_VERSION;
+if(!('serviceWorker' in navigator)){document.getElementById('chk').hidden=true;return;}
+var reg=null,reloading=false,hadCtl=!!navigator.serviceWorker.controller;
+var upd=document.getElementById('upd'),vst=document.getElementById('vst');
+function ask(w,cb){var ch=new MessageChannel();ch.port1.onmessage=function(e){cb(e.data);};w.postMessage('GET_VERSION',[ch.port2]);}
+function showUpdate(w){ask(w,function(v){
+document.getElementById('updt').textContent='New version '+v+' is ready.';
+upd.hidden=false;vst.textContent='';
+document.getElementById('updb').onclick=function(){this.textContent='Updating\u2026';w.postMessage('SKIP_WAITING');};});}
+navigator.serviceWorker.addEventListener('controllerchange',function(){
+if(!hadCtl){hadCtl=true;return;}
+if(reloading)return;reloading=true;location.reload();});
+function watch(r){r.addEventListener('updatefound',function(){var w=r.installing;
+w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)showUpdate(w);});});}
+navigator.serviceWorker.register('sw.js').then(function(r){
+reg=r;watch(r);
+if(r.waiting&&navigator.serviceWorker.controller)showUpdate(r.waiting);
+r.update().catch(function(){});
+}).catch(function(){});
+document.addEventListener('visibilitychange',function(){if(!document.hidden&&reg)reg.update().catch(function(){});});
+document.getElementById('chk').addEventListener('click',function(e){
+e.preventDefault();
+if(!reg){vst.textContent='Updates are not available in this browser mode.';return;}
+vst.textContent='Checking\u2026';
+reg.update().then(function(){
+if(reg.waiting){showUpdate(reg.waiting);return;}
+setTimeout(function(){if(upd.hidden)vst.textContent='You are on the latest version ('+APP_VERSION+').';},1500);
+}).catch(function(){vst.textContent='Could not check. Are you online?';});
+});
+})();
+</script>
 </body>
 </html>

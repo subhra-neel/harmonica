@@ -17,4 +17,7 @@ Everything runs in the browser. Nothing is uploaded anywhere.
 It also works offline after the first visit.
 
 ## Updating
-Replace index.html in the repository, and change VERSION in sw.js (for example to harmonica-tabs-v2) so installed copies pick up the new version.
+1. Replace index.html (and sw.js) in the repository.
+2. Change the version number in BOTH places: `VERSION` in sw.js and `APP_VERSION` in index.html (for example 1.5).
+3. Commit. The next time the app is opened with internet, it shows "New version 1.5 is ready" with an Update button.
+4. The footer of the app shows the current version, with a "Check for updates" link.
