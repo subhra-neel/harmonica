@@ -427,36 +427,31 @@ this.textContent='Copied';var b=this;setTimeout(function(){b.textContent='Copy t
 </script>
 <script>
 (function(){
-var APP_VERSION='1.4';
+var APP_VERSION='1.5';
 document.getElementById('vnum').textContent=APP_VERSION;
-if(!('serviceWorker' in navigator)){document.getElementById('chk').hidden=true;return;}
-var reg=null,reloading=false,hadCtl=!!navigator.serviceWorker.controller;
 var upd=document.getElementById('upd'),vst=document.getElementById('vst');
-function ask(w,cb){var ch=new MessageChannel();ch.port1.onmessage=function(e){cb(e.data);};w.postMessage('GET_VERSION',[ch.port2]);}
-function showUpdate(w){ask(w,function(v){
+function hardUpdate(){
+var p=[];
+if('serviceWorker' in navigator)p.push(navigator.serviceWorker.getRegistrations().then(function(rs){return Promise.all(rs.map(function(r){return r.unregister();}));}));
+if(window.caches)p.push(caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k);}));}));
+Promise.all(p).catch(function(){}).then(function(){location.reload();});
+}
+function showUpdate(v){
 document.getElementById('updt').textContent='New version '+v+' is ready.';
 upd.hidden=false;vst.textContent='';
-document.getElementById('updb').onclick=function(){this.textContent='Updating\u2026';w.postMessage('SKIP_WAITING');};});}
-navigator.serviceWorker.addEventListener('controllerchange',function(){
-if(!hadCtl){hadCtl=true;return;}
-if(reloading)return;reloading=true;location.reload();});
-function watch(r){r.addEventListener('updatefound',function(){var w=r.installing;
-w.addEventListener('statechange',function(){if(w.state==='installed'&&navigator.serviceWorker.controller)showUpdate(w);});});}
-navigator.serviceWorker.register('sw.js').then(function(r){
-reg=r;watch(r);
-if(r.waiting&&navigator.serviceWorker.controller)showUpdate(r.waiting);
-r.update().catch(function(){});
-}).catch(function(){});
-document.addEventListener('visibilitychange',function(){if(!document.hidden&&reg)reg.update().catch(function(){});});
-document.getElementById('chk').addEventListener('click',function(e){
-e.preventDefault();
-if(!reg){vst.textContent='Updates are not available in this browser mode.';return;}
-vst.textContent='Checking\u2026';
-reg.update().then(function(){
-if(reg.waiting){showUpdate(reg.waiting);return;}
-setTimeout(function(){if(upd.hidden)vst.textContent='You are on the latest version ('+APP_VERSION+').';},1500);
-}).catch(function(){vst.textContent='Could not check. Are you online?';});
-});
+document.getElementById('updb').onclick=function(){this.textContent='Updating\u2026';hardUpdate();};
+}
+function checkRemote(manual){
+if(manual)vst.textContent='Checking\u2026';
+fetch('version.json?t='+Date.now(),{cache:'no-store'}).then(function(r){return r.json();}).then(function(j){
+if(j&&j.version&&j.version!==APP_VERSION){showUpdate(j.version);}
+else if(manual){vst.textContent='You are on the latest version ('+APP_VERSION+').';}
+}).catch(function(){if(manual)vst.textContent='Could not check. Are you online?';});
+}
+document.getElementById('chk').addEventListener('click',function(e){e.preventDefault();checkRemote(true);});
+document.addEventListener('visibilitychange',function(){if(!document.hidden)checkRemote(false);});
+checkRemote(false);
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(function(r){r.update().catch(function(){});}).catch(function(){});}
 })();
 </script>
 </body>

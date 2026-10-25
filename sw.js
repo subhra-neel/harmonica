@@ -1,12 +1,12 @@
-// Offline cache + update prompt. To release an update: change VERSION here AND APP_VERSION in index.html.
-const VERSION = '1.4';
+// Offline support. To release an update: change VERSION here, APP_VERSION in index.html and "version" in version.json.
+const VERSION = '1.5';
 const CACHE = 'harmonica-tabs-' + VERSION;
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
-  // No skipWaiting here: the page shows an "Update" button and asks the new worker to take over.
+  self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(c =>
-    Promise.all(FILES.map(u => fetch(new Request(u, { cache: 'reload' })).then(r => c.put(u, r))))
+    Promise.all(FILES.map(u => fetch(new Request(u, { cache: 'reload' })).then(r => c.put(u, r)).catch(() => {})))
   ));
 });
 
@@ -18,12 +18,18 @@ self.addEventListener('activate', e => {
   );
 });
 
-self.addEventListener('message', e => {
-  if (e.data === 'SKIP_WAITING') self.skipWaiting();
-  else if (e.data === 'GET_VERSION' && e.ports[0]) e.ports[0].postMessage(VERSION);
-});
-
 self.addEventListener('fetch', e => {
-  if (e.request.method !== 'GET') return;
-  e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request)));
+  const req = e.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.pathname.endsWith('version.json')) return;          // always straight from the network
+  if (req.mode === 'navigate') {                               // page: network first, cache when offline
+    e.respondWith(
+      fetch(req.url, { cache: 'no-cache' })
+        .then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put('index.html', copy)); return r; })
+        .catch(() => caches.match('index.html').then(h => h || caches.match('./')))
+    );
+    return;
+  }
+  e.respondWith(caches.match(req).then(hit => hit || fetch(req)));
 });
