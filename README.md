@@ -1,26 +1,23 @@
-# MIDI to Harmonica Tabs
+# Harmonica Coach
 
-A single-page app that turns MIDI files (songs, keyboard, drums) or solo harmonica recordings into harmonica tabs for 10-hole diatonic and 12-hole chromatic harmonicas.
+A practice app for 10-hole diatonic and 12-hole chromatic harmonicas. It runs entirely in the browser: nothing is uploaded, and microphone audio stays on the device.
 
-Everything runs in the browser. Nothing is uploaded anywhere.
+## What it does
+- **Learn**: 33 lessons in five levels (Beginner to Master) covering single notes, melodies, chords, progressions, bends and slide technique, with tips for each lesson.
+- **Perform**: play along into the microphone after a one-bar count-in. You get a score, stars, pitch, timing and steadiness meters, specific tips, a note-by-note list, and a replay of your attempt.
+- **Songs**: turn MIDI files (songs, keyboard, drums) or solo harmonica recordings into tabs. Fix detected notes, loop sections, slow down, and save songs.
+- **Free play**: shows which hole and note you are playing and how in tune you are.
+- Tab style as numbers (4 / -4) or arrows (↑4 / ↓4), any harmonica key, time signatures, speed trainer, print and download.
 
 ## Put it online with GitHub Pages
-1. Create a new public repository on GitHub.
-2. Upload all files in this folder to the root of the repository (index.html, manifest.webmanifest, sw.js, icon-192.png, icon-512.png, README.md).
-3. Go to Settings > Pages. Under "Build and deployment" choose "Deploy from a branch", pick the main branch and the / (root) folder, then Save.
-4. After a minute your app is live at https://YOUR-USERNAME.github.io/REPOSITORY-NAME/
+1. Create a public repository on GitHub.
+2. Upload these files to the root of the repository: index.html, manifest.webmanifest, sw.js, version.json, icon-192.png, icon-512.png, README.md.
+3. Settings > Pages > Deploy from a branch > main, / (root) > Save.
+4. After a minute it is live at https://YOUR-USERNAME.github.io/REPOSITORY-NAME/
 
-## Install on a tablet
-- Android (Chrome): open the link, tap the menu (three dots), then "Install app" or "Add to Home screen".
-- iPad (Safari): open the link, tap Share, then "Add to Home Screen".
+## Install on a tablet or phone
+- Android (Chrome): open the link, menu (three dots) > Install app.
+- iPad / iPhone (Safari): open the link, Share > Add to Home Screen.
 
-It also works offline after the first visit.
-
-## Updating
-1. Replace index.html, sw.js and version.json in the repository.
-2. Change the version number in THREE places: `APP_VERSION` in index.html, `VERSION` in sw.js, and `"version"` in version.json (for example 1.6).
-3. Commit. Whenever the app is open or reopened with internet, it compares its own version with version.json and shows "New version 1.6 is ready" with an Update button.
-4. The footer of the app shows the current version, with a "Check for updates" link.
-
-## If an installed copy is stuck on an old version
-Open the live link in the browser with a made-up ending, for example https://YOUR-USERNAME.github.io/REPOSITORY-NAME/?x=1 . If the footer shows the latest version, the files are fine and only the tablet's old copy is stale: close the installed app completely and open it twice. As a last resort, clear the site's data in the browser settings and reopen.
+## Releasing an update
+Change the version number in three places: `APP_VERSION` in index.html, `VERSION` in sw.js and `"version"` in version.json. Upload the changed files. Installed copies show "New version ... is ready" with an Update button.
