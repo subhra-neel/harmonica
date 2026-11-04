@@ -5,6 +5,7 @@ A practice app for 10-hole diatonic and 12-hole chromatic harmonicas. It runs en
 ## What it does
 - **Learn**: 33 lessons in five levels (Beginner to Master) covering single notes, melodies, chords, progressions, bends and slide technique, with tips for each lesson.
 - **Play & wait**: the app shows each note or chord and waits until you play it, with hints.
+- **Focus mode** (⛶): full screen practice that shows only the bar being played (plus 1–3 bars ahead), large, and moves along by itself in Play, Play & wait and Perform. Bar ◀ ▶, arrow keys or a swipe flip bars by hand; the screen stays on.
 - **Perform**: play along into the microphone after a one-bar count-in. You get a score, stars, pitch, timing and steadiness meters, specific tips, a note-by-note list, and a replay of your attempt.
 - **Songs**: turn MIDI files (songs, keyboard, drums) or solo harmonica recordings into tabs. Fix detected notes, loop sections, slow down, and save songs.
 - **Free play**: shows which hole, note or chord you are playing and how in tune you are.
