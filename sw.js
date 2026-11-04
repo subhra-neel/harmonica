@@ -1,5 +1,5 @@
 // Offline support. To release an update: change VERSION here, APP_VERSION in index.html and "version" in version.json.
-const VERSION = '2.3';
+const VERSION = '2.6';
 const CACHE = 'harmonica-tabs-' + VERSION;
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
@@ -23,6 +23,10 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.pathname.endsWith('version.json')) return;          // always straight from the network
+  if (url.hostname === 'cdnjs.cloudflare.com') {               // PDF reader: keep a copy for offline use
+    e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return r; })));
+    return;
+  }
   if (req.mode === 'navigate') {                               // page: network first, cache when offline
     e.respondWith(
       fetch(req.url, { cache: 'no-cache' })

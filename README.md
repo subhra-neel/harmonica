@@ -4,9 +4,11 @@ A practice app for 10-hole diatonic and 12-hole chromatic harmonicas. It runs en
 
 ## What it does
 - **Learn**: 33 lessons in five levels (Beginner to Master) covering single notes, melodies, chords, progressions, bends and slide technique, with tips for each lesson.
+- **Play & wait**: the app shows each note or chord and waits until you play it, with hints.
 - **Perform**: play along into the microphone after a one-bar count-in. You get a score, stars, pitch, timing and steadiness meters, specific tips, a note-by-note list, and a replay of your attempt.
 - **Songs**: turn MIDI files (songs, keyboard, drums) or solo harmonica recordings into tabs. Fix detected notes, loop sections, slow down, and save songs.
-- **Free play**: shows which hole and note you are playing and how in tune you are.
+- **Free play**: shows which hole, note or chord you are playing and how in tune you are.
+- **Import**: MIDI and MusicXML (.mxl/.musicxml, e.g. from MuseScore, with lyrics and chord symbols); chord sheets and text guitar tabs pasted from sites like Ultimate Guitar, or opened as text PDFs; or type your own chord bars.
 - Tab style as numbers (4 / -4) or arrows (↑4 / ↓4), any harmonica key, time signatures, speed trainer, print and download.
 
 ## Put it online with GitHub Pages
