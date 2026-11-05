@@ -253,6 +253,27 @@ body.focusing{overflow:hidden}
 .fdone{margin:6px 0;padding:8px 12px;border-radius:10px;background:var(--soft);font-size:.9rem;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 @media (max-width:640px){.fhead{gap:6px}.fhead h2{flex-basis:100%;order:-1}.fopt{font-size:.8rem;gap:6px}.fopt select{min-height:30px}#fx{padding:6px 10px}#fsecw .secrow{gap:6px}#fsecw select{min-height:34px}#focus #chips .chip i{font-size:.75rem}#focus #chips .chip{min-height:66px;font-size:1rem}#focus #chips .chip b{font-size:1.2rem}.fctl .big{min-width:0;flex:1 1 30%}}
 @media (max-height:520px){#focus #chips .chip{min-height:58px}.fstat{margin:4px 0}}
+/* help: animated piano-roll demo */
+.rdemo{position:relative;border:1px solid var(--bd);border-radius:12px;padding:10px;background:var(--bg);margin:0 0 10px;overflow:hidden}
+.rd-sum{font-weight:600;font-size:.85rem;margin-bottom:6px;padding:4px 8px;border-radius:8px;transition:background .3s}
+.rd-sum.hl{background:var(--soft)}
+.rd-roll{position:relative;height:150px;margin-left:0;border:1px solid var(--bd);border-radius:8px;background:repeating-linear-gradient(to bottom,transparent 0 24px,var(--bd) 24px 25px),var(--card)}
+.rd-roll::before{content:'';position:absolute;top:0;bottom:0;left:42px;border-left:1px solid var(--bd)}
+.rd-lab{position:absolute;left:4px;top:calc(var(--y) * 25px);height:25px;line-height:25px;font-size:.66rem;color:var(--mut)}
+.rd-n{position:absolute;height:21px;top:calc(var(--y) * 25px + 2px);left:calc(44px + var(--x) * (100% - 50px) / 8);width:calc(var(--w) * (100% - 50px) / 8 - 3px);background:var(--ac);color:var(--acfg);border-radius:4px;font:700 .68rem/21px system-ui,sans-serif;padding-left:4px;transition:top .45s,left .45s,opacity .4s,box-shadow .2s;white-space:nowrap;overflow:hidden}
+.rd-n.sel{box-shadow:0 0 0 2.5px var(--fg)}
+.rd-n.gone{opacity:0}
+.rd-n.bad{background:var(--bad)}
+.rd-ph{position:absolute;top:0;bottom:0;width:2px;background:var(--fg);left:calc(44px + var(--x,0) * (100% - 50px) / 8);opacity:0}
+.rd-ph.run{opacity:1;transition:left 2.2s linear}
+.rd-btns{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.rd-btns span{font-size:.72rem;padding:5px 8px;border:1px solid var(--bd);border-radius:8px;background:var(--card);transition:background .15s,transform .15s}
+.rd-btns span.press{background:var(--ac);color:var(--acfg);transform:scale(.94)}
+.rd-cur{position:absolute;left:0;top:0;font-size:1.3rem;pointer-events:none;transition:transform .6s ease;z-index:2;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+.rd-cap{min-height:2.8em;margin:8px 0 4px;font-size:.88rem;line-height:1.4}
+.rd-ctl{display:flex;align-items:center;justify-content:center;gap:8px}
+#rddots{display:flex;gap:5px}#rddots i{width:7px;height:7px;border-radius:50%;background:var(--bd)}#rddots i.on{background:var(--ac)}
+@media (prefers-reduced-motion:reduce){.rd-n,.rd-cur,.rd-ph.run{transition:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}.chip.on{transform:none}}
 </style>
 </head>
@@ -292,9 +313,10 @@ body.focusing{overflow:hidden}
 <div class="openrow">
 <label class="filebtn"><input id="f" type="file" accept=".mid,.midi,audio/midi,.mxl,.musicxml,.xml,.pdf"><b>🎼 MIDI or MusicXML</b><span>.mid, .mxl or .musicxml, e.g. from MuseScore</span></label>
 <label class="filebtn"><input id="pdff" type="file" accept=".pdf,application/pdf"><b>📄 Chord sheet PDF</b><span>Text PDFs with chords or tabs, e.g. Ultimate Guitar</span></label>
-<label class="filebtn"><input id="af" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.webm"><b>🎙 Recording of one tune</b><span>solo harmonica, or you humming, whistling or singing the melody (mp3, m4a, wav)</span></label>
+<label class="filebtn"><input id="af" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.webm"><b>🎙 Recording / song mp3</b><span>solo harmonica, your humming or singing, or a full song: the app finds the tune</span></label>
 </div>
-<div class="info" id="ast">MusicXML brings the melody with its lyrics and chord symbols. PDFs must contain real text: printed sheet music and Songsterr tabs can't be read. Recordings: the first 2.5 minutes, one harmonica, no backing music.</div>
+<label class="mini" style="margin-top:10px;display:block">The recording is<select id="amode"><option value="auto" selected>Let the app decide</option><option value="solo">One instrument or voice alone</option><option value="song">A full song (singer with band)</option></select></label>
+<div class="info" id="ast">MusicXML brings the melody with its lyrics and chord symbols. PDFs must contain real text: printed sheet music and Songsterr tabs can't be read. Recordings up to 8 minutes. Solo playing or humming gives the most exact notes. For a full song the app follows the main tune; in the intro and solos that is the lead instrument, and fast vocal ornaments are simplified.</div>
 </div>
 <div class="card">
 <h2>Paste a chord sheet or tab</h2>
@@ -385,6 +407,7 @@ body.focusing{overflow:hidden}
 <label class="ck"><input type="checkbox" id="nn"> Note names in tabs</label>
 <label class="ck"><input type="checkbox" id="cho"> Chords (several holes)</label>
 <label class="ck">Bars <select id="blay"><option value="vert">Vertical (one bar per line)</option><option value="horiz">Horizontal (side by side)</option></select></label>
+<label class="ck" title="Songs often have long stretches where the tune rests (intros, solos). Shorten them for practice. Kept as they are while the backing band plays, so you stay in time with it.">Long silences <select id="gaps"><option value="keep">Keep, as in the song</option><option value="one">Shorten to 1 bar</option><option value="none">Remove</option></select></label>
 <label class="ck">Beats per bar <select id="ts"><option value="2">2 (2/4)</option><option value="3">3 (3/4, waltz)</option><option value="4" selected>4 (4/4, most songs)</option><option value="5">5 (5/4)</option><option value="6">6 (6/4)</option><option value="7">7 (7/4)</option></select></label>
 <span class="legend" id="tsnote" style="flex:1 1 100%"></span>
 </div>
@@ -492,6 +515,7 @@ body.focusing{overflow:hidden}
 <li><b>Play</b> lets you hear the part. Loop a few bars and slow it down with Speed.</li>
 <li><b>Play &amp; wait</b> shows one note at a time, plays it to you and waits until you play it, with hints if you miss. Learn the notes this way first.</li>
 <li><b>⛶ Focus</b> fills the screen with just the bar you are on (and the next ones), large, and turns the page for you as you play. Use Bar ◀ ▶, the arrow keys or a swipe to move by hand. Long songs: pick From/To bar there too.</li>
+<li><b>Long silences</b> (under the bars): songs often leave the tune resting for many bars in the intro and solos. Choose <b>Shorten to 1 bar</b> or <b>Remove</b> to practise without the wait. While the backing band plays they stay as in the song, so you keep time with it.</li>
 <li><b>Perform</b> listens while you play along, after a one-bar count-in. You get a score, stars and tips.</li>
 <li>Only <b>your own playing</b> counts: Play, Replay and speaker playback never add to your progress, and a lesson counts only when you perform all of it.</li>
 <li>Aim for <b>80%</b> (★★) before moving on. <b>Speed trainer</b> starts slow and goes up a step each loop and after every Perform of 85% or more.</li>
@@ -504,6 +528,25 @@ body.focusing{overflow:hidden}
 <li>A card starts where it sits under the ruler, and <b>its width is its length</b>: a card as wide as one beat lasts one beat; half as wide, half a beat.</li>
 <li>A gap with <b>·</b> is silence. <b>──</b> means keep holding the note from the bar before.</li>
 <li>Song files and lessons set the beats per bar for you. Change it only if the bars look shifted.</li>
+</ul>
+<h3>Fixing a wrong note</h3>
+<p class="legend" style="margin:0 0 8px">Songs made from recordings can have a few wrong notes. Fix them in <b>Piano roll and note fixing</b>, below the tabs in the Player.</p>
+<div class="rdemo" id="rdemo">
+<div class="rd-sum">▾ Piano roll and note fixing</div>
+<div class="rd-roll" id="rdroll" aria-hidden="true">
+<div class="rd-lab" style="--y:0">E5</div><div class="rd-lab" style="--y:1">D♯5</div><div class="rd-lab" style="--y:2">D5</div><div class="rd-lab" style="--y:3">C♯5</div><div class="rd-lab" style="--y:4">C5</div><div class="rd-lab" style="--y:5">B4</div>
+<div class="rd-n" id="rdn0"></div><div class="rd-n" id="rdn1"></div><div class="rd-n" id="rdn2"></div><div class="rd-n" id="rdn3"></div>
+<div class="rd-ph" id="rdph"></div>
+</div>
+<div class="rd-btns" aria-hidden="true"><span id="rdb-dn">♭ −1</span><span id="rdb-up">♯ +1</span><span id="rdb-l">◀ Earlier</span><span id="rdb-r">Later ▶</span><span id="rdb-del">Delete</span><span id="rdb-undo">↶ Undo</span><span id="rdb-play">▶ Play from here</span></div>
+<div class="rd-cur" id="rdcur" aria-hidden="true">👆</div>
+<p class="rd-cap" id="rdcap" aria-live="polite"></p>
+<div class="rd-ctl"><button type="button" class="ghost sm" id="rdprev" aria-label="Previous step">◀</button><span id="rddots"></span><button type="button" class="ghost sm" id="rdplay" aria-label="Pause">❚❚</button><button type="button" class="ghost sm" id="rdnext" aria-label="Next step">▶</button></div>
+</div>
+<ul>
+<li>Tap a note in the roll (or its tab card) to select it, then use the buttons. The tabs and cards update straight away.</li>
+<li><b>Oct −</b> / <b>Oct +</b> move a note a whole octave; <b>+ Add after</b> puts in a missing note.</li>
+<li>Tap the bar numbers along the top of the roll twice to pick a section to loop.</li>
 </ul>
 <h3>Bringing in songs</h3>
 <ul>
@@ -682,7 +725,17 @@ if(b>maxBar)maxBar=b;
 });
 var rows=[],row=[];
 var first=Math.min.apply(null,Object.keys(beats).map(Number));rollOff=first*bar;
+// long silences: bars where the tune plays nothing can be shortened for practice (never while the backing band plays along)
+var gapMode=document.getElementById('gaps').value,keepBar={},cut=[],gapNote='';
+for(var gb=first;gb<=maxBar;gb++)keepBar[gb]=true;
+if(gapMode!=='keep'&&!part.drum){
+if(hasBacking(part))gapNote='Long silences kept: the backing band plays during them (turn Backing off to shorten them).';
+else{var occ={};mel.forEach(function(x){var e=x.t+Math.max(1,x.d||ppq);for(var q=Math.floor(x.t/bar);q<=Math.floor((e-1)/bar);q++)occ[q]=1;});
+var run=0;for(gb=first;gb<=maxBar;gb++){if(occ[gb]){run=0;continue;}run++;if(gapMode==='none'||run>1)keepBar[gb]=false;}
+var removed=0;for(gb=first;gb<=maxBar;gb++){cut[gb-first]=removed;if(!keepBar[gb])removed++;}
+if(removed)gapNote=removed+' silent bar'+(removed>1?'s':'')+(gapMode==='none'?' removed':' shortened')+' for practice.';}}
 for(var b=first;b<=maxBar;b++){
+if(!keepBar[b])continue;
 var bb=beats[b]||blank();
 row.push(bb.map(function(a){return a.length?a.join(' '):'·';}).join(' / '));
 if(row.length===2){rows.push('| '+row.join(' | ')+' |');row=[];}
@@ -693,12 +746,14 @@ if(!part.drum){mel.forEach(function(x,i){var r=res(x),gap=i<mel.length-1?mel[i+1
 var cc3=chordOf(x);
 if(cc3)roll.push({t:x.t-first*bar,d:d,p:Math.max.apply(null,cc3.ps),tok:cc3.tok,src:x,ps:cc3.ps,holes:cc3.toks,cn:cc3.name});
 else roll.push({t:x.t-first*bar,d:d,p:r?r.p:x.n+sh,tok:r?r.tok:'?',src:x});});}
+if(cut.length){roll.forEach(function(r){var bi=Math.max(0,Math.min(cut.length-1,Math.floor(r.t/bar)));r.t-=cut[bi]*bar;});}
 curSh=typeof sh==='number'?sh:0;
 if(!part.drum){var shv=typeof sh==='number'?sh:0,fullC=0,partC=0;roll.forEach(function(r){var x=r.src;r.lyr=x.lyr||null;r.sec=x.sec||null;r.csym=x.csym?symShift(x.csym,shv):null;
 if(x.sym){r.sym=symShift(x.sym,shv);var pc=parseChord(r.sym),okc=false;if(pc&&r.ps){var have={};r.ps.forEach(function(p){have[((p%12)+12)%12]=1;});okc=pc.pcs.every(function(p){return have[p];});}
 r.cn=r.sym+(okc?'':' \u2248');if(okc)fullC++;else partC++;}});
 if(part.kind==='chords'){document.getElementById('info').textContent=(fullC+partC)+' chords: '+fullC+' in full'+(partC?', '+partC+' partly (\u2248)':'')+(shSel.value==='auto'&&shv?' \u00b7 moved '+(shv>0?'+':'')+shv+' semitones to suit this harmonica':'')+'.';
 document.getElementById('lg').textContent+=' Chord names are what you hear; \u2248 means only part of that chord fits this harmonica.';}}
+if(gapNote){var inf=document.getElementById('info');inf.textContent=(inf.textContent?inf.textContent.replace(/\s*$/,' '):'')+gapNote;}
 draw(null);syncPractice();replayUI();
 document.getElementById('tab').textContent=rows.join('\n');
 if(part.sheet&&!part.drum){var evm={};roll.forEach(function(r){if(r.src.ev!=null)evm[r.src.ev]=r;});
@@ -849,6 +904,10 @@ out.push({notes:rw.n.slice(s,s+len),toks:toks,tok:'['+(rw.d?'-':'')+holes.join('
 return shCache[ck]=out;}
 function beepR(r){(r.ps||[r.p]).forEach(function(p){beep(p);});}
 function selTok(){var r=roll.filter(function(q){return q.src===sel;})[0];return r?(r.holes||r.tok):null;}
+function hasBacking(part){return !!part&&!part.ex&&!part.sheet&&!part.fromSheet&&document.getElementById('bk').checked&&parts.some(function(p){return p!==part&&!p.drum&&!p.fromSheet&&p.notes.length;});}
+(function(){var g=document.getElementById('gaps');try{var v=localStorage.getItem('harmonica-gaps');if(v)g.value=v;}catch(e){}
+g.addEventListener('change',function(){try{localStorage.setItem('harmonica-gaps',g.value);}catch(e){}if(playing)stopPlay();render();});
+document.getElementById('bk').addEventListener('change',function(){if(g.value!=='keep'){if(playing)stopPlay();render();}});})();
 function nBars(){var e=0;roll.forEach(function(r){if(r.t+r.d>e)e=r.t+r.d;});return Math.max(1,Math.ceil(e/(ppq*bpb)));}
 function showTok(tok){var set=Array.isArray(tok)?tok:(tok?[tok]:[]),cs=document.querySelectorAll('#hp .hc,#hp2 .hc');for(var i=0;i<cs.length;i++)cs[i].classList.toggle('on',set.indexOf(cs[i].dataset.tok)>=0);}
 function buildHarp(target){
@@ -1587,7 +1646,7 @@ var audioNotes=[];
 function applyAudio(){
 var bpm=+document.getElementById('bpm').value||100;
 ppq=480;
-var ns=audioNotes.map(function(a){return {t:Math.round(a.s*bpm/60*4)/4*480,n:a.n,a:a};});
+var ns=audioNotes.map(function(a){var o={t:Math.round(a.s*bpm/60*4)/4*480,n:a.n,a:a};if(a.d)o.d=Math.max(120,Math.round(a.d*bpm/60*4)/4*480);return o;});
 parts=[{name:'Audio recording',ch:0,notes:ns,drum:false}];
 trSel.innerHTML='';var o=document.createElement('option');o.value=0;o.textContent='Audio recording ('+ns.length+' notes detected)';trSel.appendChild(o);
 document.getElementById('opts').hidden=false;
@@ -1597,8 +1656,82 @@ var b=document.querySelector('#sgout button');if(b)b.click();
 }
 function guessBpm(ns){var ts=ns.slice(0,80).map(function(a){return a.s;}),best=100,be=9;
 for(var b=60;b<=180;b++){var err=0;ts.forEach(function(t){var g=t*b/60*2;err+=Math.abs(g-Math.round(g));});err=err/ts.length+Math.abs(b-100)*0.0004;if(err<be){be=err;best=b;}}return best;}
+// ---- the tune of a full song (singer + band): follow the strongest melodic line instead of single clean notes.
+// Harmonic-sum pitch salience, a smooth path through it (Viterbi), then notes. Bass is left out by range.
+function monoLow(ab,maxSec){var chn=ab.numberOfChannels,sr0=ab.sampleRate,len=Math.min(ab.length,Math.floor(sr0*maxSec)),fct=Math.max(1,Math.round(sr0/22050)),sr=sr0/fct,n=Math.floor(len/fct),x=new Float32Array(n);
+for(var c=0;c<chn;c++){var dd=ab.getChannelData(c);for(var i=0;i<n;i++){var sm=0;for(var k=0;k<fct;k++)sm+=dd[i*fct+k];x[i]+=sm/fct/chn;}}return {x:x,sr:sr};}
+function songNotes(pm,ps,on,dt){var nf=pm.length,f,z;
+// smooth the pitch line a little (vibrato and slides), then find the tuning offset
+var sm=new Float32Array(nf);for(f=0;f<nf;f++){if(!on[f]){sm[f]=pm[f];continue;}var w=[];for(z=Math.max(0,f-5);z<=Math.min(nf-1,f+5);z++)if(on[z])w.push(pm[z]);w.sort(function(p,q){return p-q;});sm[f]=w[w.length>>1];}
+var devs=[];for(f=0;f<nf;f++)if(on[f])devs.push(sm[f]-Math.round(sm[f]));devs.sort(function(p,q){return p-q;});var tune=devs.length?devs[devs.length>>1]:0;
+// a new note once a different semitone holds for 4 frames (80 ms); a clear dip and swell in the line's strength splits a repeated note
+var notes=[],cur=null,st0=0,pend=0,pv=null,last=0;
+function close(endF){if(cur!=null&&(endF-st0)*dt>=0.1)notes.push({s:st0*dt,d:(endF-st0)*dt,n:cur});}
+for(f=0;f<nf;f++){if(!on[f]){if(cur!=null&&f-last>2){close(last+1);cur=null;}continue;}
+var r=Math.round(sm[f]-tune);
+if(cur==null){cur=r;st0=f;last=f;pend=0;continue;}
+if(r===cur){pend=0;var lm=0;for(z=Math.max(0,f-8);z<f;z++)if(ps[z]>lm)lm=ps[z];if(ps[f]<0.4*lm&&f-st0>8){var nx=0;for(z=f;z<Math.min(nf,f+8);z++)if(ps[z]>nx)nx=ps[z];if(nx>1.8*ps[f]){close(f);st0=f;}}last=f;continue;}
+if(r===pv)pend++;else{pv=r;pend=1;}
+if(pend>=4){close(f-3);cur=r;st0=f-3;pend=0;pv=null;}last=f;}
+close(last+1);
+// very short notes join a neighbour; same-pitch notes split by a tiny gap become one
+for(var it=0;it<notes.length;it++){var a=notes[it];if(a.d>=0.15)continue;var pr=notes[it-1],nx2=notes[it+1],pg=pr?a.s-(pr.s+pr.d):9,ng=nx2?nx2.s-(a.s+a.d):9;
+if(pr&&pg<0.06&&(pg<=ng||!nx2)){pr.d=a.s+a.d-pr.s;notes.splice(it,1);it--;}else if(nx2&&ng<0.06){nx2.d=nx2.s+nx2.d-a.s;nx2.s=a.s;notes.splice(it,1);it--;}}
+for(it=1;it<notes.length;it++){var b0=notes[it],p0=notes[it-1];if(b0.n===p0.n&&b0.s-(p0.s+p0.d)<0.06){p0.d=b0.s+b0.d-p0.s;notes.splice(it,1);it--;}}
+if(!notes.length)return notes;
+// tidy: fold quick out-of-key slides into neighbours (key from the notes themselves)
+var hist=new Array(12).fill(0);notes.forEach(function(a){hist[((a.n%12)+12)%12]+=a.d;});
+var MAJ=[6.35,2.23,3.48,2.33,4.38,4.09,2.52,5.19,2.39,3.66,2.29,2.88],MIN=[6.33,2.68,3.52,5.38,2.6,3.53,2.54,4.75,3.98,2.69,3.34,3.17],bk=0,bm=0,bv=-9;
+for(var t1=0;t1<12;t1++)[MAJ,MIN].forEach(function(P,mi){var rot=[];for(var q=0;q<12;q++)rot[(q+t1)%12]=P[q];var c2=corr12(rot,hist);if(c2>bv){bv=c2;bk=t1;bm=mi;}});
+var scale=(bm?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11]).map(function(q){return (q+bk)%12;}),inK=function(n){return scale.indexOf(((n%12)+12)%12)>=0;};
+for(var it=0;it<notes.length;it++){var a2=notes[it];if(a2.d<0.13&&!inK(a2.n)){var pr=notes[it-1],nx2=notes[it+1];
+if(pr&&a2.s-(pr.s+pr.d)<0.08){pr.d=a2.s+a2.d-pr.s;notes.splice(it,1);it--;}else if(nx2&&nx2.s-(a2.s+a2.d)<0.08){nx2.d=nx2.s+nx2.d-a2.s;nx2.s=a2.s;notes.splice(it,1);it--;}}}
+notes.forEach(function(a3){if(!inK(a3.n)&&a3.d<0.3){var u=inK(a3.n+1),dn2=inK(a3.n-1);if(u&&!dn2)a3.n++;else if(dn2&&!u)a3.n--;}});
+return notes;}
+async function detectSong(ab,st){var M=monoLow(ab,480),x=M.x,sr=M.sr,N=2048,HOP=441,nf=Math.floor((x.length-N)/HOP);if(nf<10)return [];
+var FMIN=138.6,BC=20,NB=Math.floor(1200*Math.log2(1100/FMIN)/BC),sal=new Float32Array(nf*NB),fe=new Float32Array(nf),win=new Float32Array(N),re=new Float32Array(N),im=new Float32Array(N),mag=new Float32Array(N/2),kHi=Math.floor(5000*N/sr),i,k,f;
+for(i=0;i<N;i++)win[i]=0.5-0.5*Math.cos(2*Math.PI*i/N);
+var WT=new Float32Array(61);for(i=0;i<=60;i++){var cv=Math.cos(i/60*Math.PI/2);WT[i]=cv*cv;}var prevM=new Float32Array(N/2),flux=new Float32Array(nf);
+for(f=0;f<nf;f++){var o=f*HOP,e=0;for(i=0;i<N;i++){re[i]=x[o+i]*win[i];im[i]=0;e+=re[i]*re[i];}fe[f]=e;fftIP(re,im);
+var mx=0,fx=0;for(k=0;k<N/2;k++){mag[k]=Math.sqrt(re[k]*re[k]+im[k]*im[k]);if(mag[k]>mx)mx=mag[k];var lg=Math.log(1+100*mag[k]);if(k<kHi&&lg>prevM[k])fx+=lg-prevM[k];prevM[k]=lg;}flux[f]=fx;
+for(k=2;k<kHi;k++){var a=mag[k];if(a<mx*0.02||a<=mag[k-1]||a<mag[k+1])continue;
+var al=Math.log(mag[k-1]+1e-12),am=Math.log(a),ar=Math.log(mag[k+1]+1e-12),dn=al-2*am+ar,dl=dn?0.5*(al-ar)/dn:0,fk=(k+dl)*sr/N,A=Math.sqrt(a/mx);
+for(var hh=1;hh<=8;hh++){var f0=fk/hh;if(f0<FMIN*0.97)break;var cc=1200*Math.log2(f0/FMIN)/BC;if(cc>NB+2)continue;var w=A*Math.pow(0.8,hh-1),c0=Math.round(cc);
+for(var b=c0-3;b<=c0+3;b++){if(b<0||b>=NB)continue;var dd2=Math.abs(b-cc)*BC/100;if(dd2>=0.6)continue;sal[f*NB+b]+=w*WT[Math.round(dd2*100)];}}}
+if(f%250===0){st.textContent='Finding the tune\u2026 '+Math.round(70*f/nf)+'%';await new Promise(function(r){setTimeout(r,0);});}}
+// normalise, then the smoothest strong path (pitch jumps cost a little)
+var fmx=new Float32Array(nf);for(f=0;f<nf;f++){var m=0;for(var b2=0;b2<NB;b2++)if(sal[f*NB+b2]>m)m=sal[f*NB+b2];fmx[f]=m;}
+var srt=Array.prototype.slice.call(fmx).sort(function(p,q){return p-q;}),norm=srt[Math.floor(srt.length*0.95)]||1,J=0.03;
+var score=new Float64Array(NB),best=new Float64Array(NB),arg=new Int32Array(NB),back=new Int16Array(nf*NB);
+for(f=0;f<nf;f++){for(b=0;b<NB;b++){best[b]=score[b];arg[b]=b;}
+for(b=1;b<NB;b++){if(best[b-1]-J>best[b]){best[b]=best[b-1]-J;arg[b]=arg[b-1];}}
+for(b=NB-2;b>=0;b--){if(best[b+1]-J>best[b]){best[b]=best[b+1]-J;arg[b]=arg[b+1];}}
+var top=-1e18;for(b=0;b<NB;b++){score[b]=best[b]+sal[f*NB+b]/norm;back[f*NB+b]=arg[b];if(score[b]>top)top=score[b];}
+for(b=0;b<NB;b++)score[b]-=top;
+if(f%500===0){st.textContent='Finding the tune\u2026 '+(70+Math.round(25*f/nf))+'%';await new Promise(function(r){setTimeout(r,0);});}}
+var path=new Int16Array(nf),bb=0,bs=-1e18;for(b=0;b<NB;b++)if(score[b]>bs){bs=score[b];bb=b;}path[nf-1]=bb;for(f=nf-1;f>0;f--)path[f-1]=back[f*NB+path[f]];
+// fine pitch, loudness gate, how strong the line is
+var srtE=Array.prototype.slice.call(fe).sort(function(p,q){return p-q;}),eRef=srtE[Math.floor(srtE.length*0.95)]||1,pm=new Float32Array(nf),on=new Uint8Array(nf),ps=new Float32Array(nf);
+for(f=0;f<nf;f++){var pb=path[f],sa=pb>0?sal[f*NB+pb-1]:0,sb=sal[f*NB+pb],sc=pb<NB-1?sal[f*NB+pb+1]:0,den=sa-2*sb+sc,off=den?0.5*(sa-sc)/den:0;if(off>0.5||off<-0.5)off=0;
+pm[f]=69+12*Math.log2(FMIN*Math.pow(2,(pb+off)*BC/1200)/440);ps[f]=sb/norm;on[f]=fe[f]>eRef*0.02&&ps[f]>0.2?1:0;}
+detectSong.raw={pm:pm,ps:ps,on:on,dt:HOP/sr};var notes=songNotes(pm,ps,on,HOP/sr);if(!notes.length)return [];
+// tempo: the beat period whose multiples (beat, 2 beats, bar, 2 bars) repeat most in the onset envelope, leaning towards 70–130 bpm
+var dtf=HOP/sr,mean=0;for(f=0;f<nf;f++)mean+=flux[f];mean/=nf;var ev=new Float32Array(nf);for(f=0;f<nf;f++)ev[f]=Math.max(0,flux[f]-mean);
+var n00=0;for(f=0;f<nf;f++)n00+=ev[f]*ev[f];var acC={};
+function ac1(L){if(acC[L]!=null)return acC[L];var s=0;if(L<1||L>=nf)return 0;for(var q=0;q+L<nf;q++)s+=ev[q]*ev[q+L];return acC[L]=n00?s/n00:0;}
+// live recordings drift a little, so look in a small window around each lag
+function ac(lag){var L=lag/dtf,lo=Math.round(L*0.985),hi=Math.round(L*1.015),m=0;for(var q=lo;q<=hi;q++){var v=ac1(q);if(v>m)m=v;}return m;}
+var bestB=100,bestS=-1;for(var bpm=60;bpm<=180;bpm+=0.5){var T=60/bpm,sc2=ac(T)+0.5*ac(2*T)+ac(4*T)+0.5*ac(8*T),pr=Math.exp(-0.5*Math.pow(Math.log2(bpm/100)/0.6,2));sc2*=0.5+0.5*pr;if(sc2>bestS){bestS=sc2;bestB=bpm;}}
+// fine-tune: long lags (a bar, two bars) pin the exact tempo down
+var fineB=bestB,fs2=-1;for(var b3=bestB*0.97;b3<=bestB*1.03;b3+=0.1){var T3=60/b3,v3=ac1(Math.round(T3/dtf))+ac1(Math.round(4*T3/dtf))+ac1(Math.round(8*T3/dtf));if(v3>fs2){fs2=v3;fineB=b3;}}bestB=fineB;
+detectSong.bpm=Math.round(bestB);detectSong.ev=ev;detectSong.dtf=dtf;
+// beat phase: where the onsets line up best, so the notes sit on the beat grid
+var Tf=60/bestB/dtf,bestP=0,bv2=-1;for(var ph=0;ph<Tf;ph+=1){var s3=0;for(var q2=ph;q2<nf;q2+=Tf)s3+=ev[Math.round(q2)]||0;if(s3>bv2){bv2=s3;bestP=ph;}}
+var beat0=bestP*dtf,first=notes[0].s,Tb=Tf*dtf;detectSong.zero=Math.floor((first-beat0)/Tb+0.02)*Tb+beat0;
+var t00=detectSong.zero!=null?detectSong.zero:notes[0].s;detectSong.zero=null;detectSong.t0=t00;notes.forEach(function(a4){a4.s-=t00;});
+return notes;}
 async function detect(ab,st){
-var chn=ab.numberOfChannels,sr0=ab.sampleRate,len=Math.min(ab.length,sr0*150);
+var chn=ab.numberOfChannels,sr0=ab.sampleRate,len=Math.min(ab.length,sr0*480);
 var fct=Math.max(1,Math.round(sr0/22050)),sr=sr0/fct,n=Math.floor(len/fct),x=new Float32Array(n);
 for(var c=0;c<chn;c++){var dd=ab.getChannelData(c);for(var i=0;i<n;i++){var sm=0;for(var k=0;k<fct;k++)sm+=dd[i*fct+k];x[i]+=sm/fct/chn;}}
 var W=800,MAXL=147,MINL=10,HOP=441,nf=Math.floor((n-W-MAXL)/HOP);
@@ -1614,6 +1747,7 @@ if(best>0){var pa=df[best-1],pb=df[best],pc=df[Math.min(best+1,MAXL)],den=pa-2*p
 mid[fi]=Math.round(69+12*Math.log2(sr/(best+off)/440));}else mid[fi]=null;
 if(fi%300===0){st.textContent='Analysing\u2026 '+Math.round(100*fi/nf)+'%';await new Promise(function(r){setTimeout(r,0);});}
 }
+var loudN=0,pitN=0;for(var g0=0;g0<nf;g0++){if(rms[g0]>=0.08*mx){loudN++;if(mid[g0]!=null)pitN++;}}detect.pitched=loudN?pitN/loudN:0;
 for(var g=0;g<nf;g++){if(rms[g]<0.08*mx||mid[g]<45||mid[g]>100)mid[g]=null;}
 var sm5=new Array(nf);
 for(var h=0;h<nf;h++){var cnt={},bn=null,bc=0;
@@ -1642,11 +1776,13 @@ try{
 var ac=new (window.AudioContext||window.webkitAudioContext)();
 var ab=await ac.decodeAudioData(await f.arrayBuffer());
 if(ac.close)ac.close();
-var res=await detect(ab,st);
+var mode=document.getElementById('amode')?document.getElementById('amode').value:'auto',res=null,how='';
+if(mode!=='song'){res=await detect(ab,st);}
+if(mode==='song'||(mode==='auto'&&detect.pitched<0.3)){res=await detectSong(ab,st);how=' (full song: followed the main tune; intro and solo parts give the lead instrument\u2019s line)';}
 if(res.length<2)throw new Error('No clear notes found. Try a solo recording without backing music.');
 audioNotes=res;
-document.getElementById('bpm').value=guessBpm(res);
-st.textContent=res.length+' notes found. Key and tempo were guessed, adjust if needed.';
+document.getElementById('bpm').value=(how&&detectSong.bpm)?detectSong.bpm:guessBpm(res);
+st.textContent=res.length+' notes found'+how+'. Key and tempo were guessed, adjust if needed.';
 applyAudio();
 }catch(err){st.textContent='';toast('Could not analyse that audio: '+err.message);}
 });
@@ -1745,7 +1881,34 @@ if(r.t<RA*ppq||r.t>=RB*ppq){document.getElementById('pall').click();}
 playFrom=r.t;document.getElementById('pl').click();});
 // welcome + help
 var w_key=document.getElementById('w-key');Object.keys(KEYS).forEach(function(k){var o=document.createElement('option');o.textContent=k;w_key.appendChild(o);});
-function openHelp(){document.getElementById('help').hidden=false;}
+function openHelp(){document.getElementById('help').hidden=false;if(window.rdStart)rdStart();}
+// ---- help: animated demo of fixing a note in the piano roll
+(function(){var box=document.getElementById('rdemo');if(!box)return;var step=0,timers=[],paused=false,reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var base=[{x:0,y:4,w:1,t:'C5'},{x:1,y:2,w:1,t:'D5'},{x:2,y:0,w:2,t:'E5',bad:1},{x:5,y:5,w:0.5,t:'B4'}];
+var Y={E5:0,'D\u266f5':1,D5:2,'C\u266f5':3,C5:4,B4:5};
+function setN(i,o){var e=document.getElementById('rdn'+i);e.style.setProperty('--x',o.x);e.style.setProperty('--y',o.y);e.style.setProperty('--w',o.w);e.textContent=o.t;e.className='rd-n'+(o.sel?' sel':'')+(o.gone?' gone':'')+(o.bad?' bad':'');}
+function state(over){base.forEach(function(b,i){var o={};for(var k in b)o[k]=b[k];if(over&&over[i])for(var k2 in over[i])o[k2]=over[i][k2];setN(i,o);});}
+function cur(id,dx,dy){var el=document.getElementById(id),c=document.getElementById('rdcur');if(!el)return;var r=el.getBoundingClientRect(),b=box.getBoundingClientRect();c.style.transform='translate('+(r.left-b.left+r.width*(dx==null?0.45:dx))+'px,'+(r.top-b.top+r.height*(dy==null?0.35:dy))+'px)';}
+function press(id){var e=document.getElementById(id);e.classList.add('press');later(function(){e.classList.remove('press');},260);}
+function later(fn,ms){timers.push(setTimeout(fn,ms));}
+var fixed={2:{y:2,t:'D5',bad:0}};
+var S=[
+{cap:'Open <b>Piano roll and note fixing</b> below the tabs. Each block is a note: higher up is a higher note, further right is later. Here the red E5 should be a D5.',run:function(){state();document.querySelector('.rd-sum').classList.add('hl');cur('rdroll',0.9,0.1);}},
+{cap:'<b>Tap the wrong note</b> to select it. You hear it, and the harmonica chart shows its hole.',run:function(){state();cur('rdn2');later(function(){state({2:{sel:1}});},700);}},
+{cap:'Press <b>\u266d \u22121</b> to lower it a half-step (<b>\u266f +1</b> raises it). Two presses: E5 \u2192 D\u266f5 \u2192 D5.',run:function(){state({2:{sel:1}});cur('rdb-dn');later(function(){press('rdb-dn');state({2:{sel:1,y:1,t:'D\u266f5'}});},700);later(function(){press('rdb-dn');state({2:{sel:1,y:2,t:'D5',bad:0}});},1500);}},
+{cap:'Starts too early or too late? <b>\u25c0 Earlier</b> and <b>Later \u25b6</b> move it a small step in time.',run:function(){state({2:{sel:1,y:2,t:'D5',bad:0}});cur('rdb-r');later(function(){press('rdb-r');state({2:{sel:1,y:2,t:'D5',bad:0,x:2.5}});},700);later(function(){press('rdb-l');cur('rdb-l');},1500);later(function(){press('rdb-l');state({2:{sel:1,y:2,t:'D5',bad:0,x:2}});},2100);}},
+{cap:'A note that should not be there? Select it and press <b>Delete</b>.',run:function(){state(fixed);cur('rdn3');later(function(){state({2:fixed[2],3:{sel:1}});},700);later(function(){cur('rdb-del');},1300);later(function(){press('rdb-del');state({2:fixed[2],3:{gone:1}});},2000);}},
+{cap:'Changed your mind? <b>\u21b6 Undo</b> puts back the last change.',run:function(){state({2:fixed[2],3:{gone:1}});cur('rdb-undo');later(function(){press('rdb-undo');state({2:fixed[2],3:{sel:1}});},800);}},
+{cap:'Select the first note and press <b>\u25b6 Play from here</b> to check by ear. The tab cards above update straight away.',run:function(){state(fixed);cur('rdn0');later(function(){state({0:{sel:1},2:fixed[2]});cur('rdb-play');},700);later(function(){press('rdb-play');var p=document.getElementById('rdph');p.classList.remove('run');p.style.setProperty('--x',0);p.offsetWidth;p.classList.add('run');p.style.setProperty('--x',6);},1400);}}];
+var dots=document.getElementById('rddots');S.forEach(function(){dots.appendChild(document.createElement('i'));});
+function show(k){timers.forEach(clearTimeout);timers=[];step=(k+S.length)%S.length;document.querySelector('.rd-sum').classList.remove('hl');var p=document.getElementById('rdph');p.classList.remove('run');p.style.setProperty('--x',0);
+document.getElementById('rdcap').innerHTML=S[step].cap;[].forEach.call(dots.children,function(d,i){d.classList.toggle('on',i===step);});S[step].run();
+if(!paused&&!reduce)later(function(){if(!document.getElementById('help').hidden)show(step+1);},5200);}
+window.rdStart=function(){paused=reduce;document.getElementById('rdplay').textContent=paused?'\u25b6\u25b6':'\u275a\u275a';setTimeout(function(){show(0);},60);};
+document.getElementById('rdprev').onclick=function(){paused=true;document.getElementById('rdplay').textContent='\u25b6\u25b6';show(step-1);};
+document.getElementById('rdnext').onclick=function(){paused=true;document.getElementById('rdplay').textContent='\u25b6\u25b6';show(step+1);};
+document.getElementById('rdplay').onclick=function(){paused=!paused;this.textContent=paused?'\u25b6\u25b6':'\u275a\u275a';this.setAttribute('aria-label',paused?'Play':'Pause');show(paused?step:step+1);};
+state();})();
 function showWelcome(){document.getElementById('w-inst').value=document.getElementById('pinst').value;w_key.value=document.getElementById('pkey').value;document.getElementById('w-ts').value=tstyle;document.getElementById('welcome').hidden=false;}
 function finishWelcome(start){
 var wi=document.getElementById('w-inst').value,pi=document.getElementById('pinst');
@@ -2236,7 +2399,7 @@ kk.addEventListener('change',function(){try{localStorage.setItem('harmonica-keep
 </script>
 <script>
 (function(){
-var APP_VERSION='3.5';
+var APP_VERSION='3.7';
 document.getElementById('vnum').textContent=APP_VERSION;
 var upd=document.getElementById('upd'),vst=document.getElementById('vst');
 function hardUpdate(){

@@ -30,3 +30,11 @@ Change the version number in three places: `APP_VERSION` in index.html, `VERSION
 - Chord sheets copied from a PDF whose line breaks got lost (chords running into the lyrics) are put back together automatically.
 - **Match the key to a recording** (Song settings): pick the song's mp3 and the app moves the tabs to the recording's key. Chord sheets are often written in an easier key or for a guitar capo.
 - A chord sheet has no melody. To get the tune, hum, whistle or sing it into a voice recorder and open it with **🎙 Recording of one tune**.
+
+### New in 3.6
+- **Full songs (singer with band)**: the recording import now follows the main tune through the whole song (up to 8 minutes) instead of picking out a few clean notes, and finds the song's tempo and beat. Intro and solo parts give the lead instrument's line. A picker lets you say whether the recording is solo or a full song (or let the app decide).
+- Solo harmonica, humming or singing still gives the most exact notes.
+
+### New in 3.7
+- **Help → Fixing a wrong note**: an animated walk-through of the piano roll (select a note, ♭/♯, Earlier/Later, Delete, Undo, Play from here).
+- **Long silences** (under the bars): Keep / Shorten to 1 bar / Remove. Bars where the tune rests are taken out for Play, Play & wait and Perform. When the song's backing band plays along, the original timing is kept so you stay in time with it.
