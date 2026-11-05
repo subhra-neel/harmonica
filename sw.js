@@ -1,5 +1,5 @@
 // Offline support. To release an update: change VERSION here, APP_VERSION in index.html and "version" in version.json.
-const VERSION = '3.4';
+const VERSION = '3.5';
 const CACHE = 'harmonica-tabs-' + VERSION;
 const FILES = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 

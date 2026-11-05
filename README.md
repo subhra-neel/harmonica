@@ -25,3 +25,8 @@ A practice app for 10-hole diatonic and 12-hole chromatic harmonicas. It runs en
 
 ## Releasing an update
 Change the version number in three places: `APP_VERSION` in index.html, `VERSION` in sw.js and `"version"` in version.json. Upload the changed files. Installed copies show "New version ... is ready" with an Update button.
+
+### New in 3.5
+- Chord sheets copied from a PDF whose line breaks got lost (chords running into the lyrics) are put back together automatically.
+- **Match the key to a recording** (Song settings): pick the song's mp3 and the app moves the tabs to the recording's key. Chord sheets are often written in an easier key or for a guitar capo.
+- A chord sheet has no melody. To get the tune, hum, whistle or sing it into a voice recorder and open it with **🎙 Recording of one tune**.

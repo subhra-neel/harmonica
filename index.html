@@ -292,7 +292,7 @@ body.focusing{overflow:hidden}
 <div class="openrow">
 <label class="filebtn"><input id="f" type="file" accept=".mid,.midi,audio/midi,.mxl,.musicxml,.xml,.pdf"><b>🎼 MIDI or MusicXML</b><span>.mid, .mxl or .musicxml, e.g. from MuseScore</span></label>
 <label class="filebtn"><input id="pdff" type="file" accept=".pdf,application/pdf"><b>📄 Chord sheet PDF</b><span>Text PDFs with chords or tabs, e.g. Ultimate Guitar</span></label>
-<label class="filebtn"><input id="af" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.webm"><b>🎙 Harmonica recording</b><span>mp3, m4a or wav of a solo harmonica</span></label>
+<label class="filebtn"><input id="af" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.webm"><b>🎙 Recording of one tune</b><span>solo harmonica, or you humming, whistling or singing the melody (mp3, m4a, wav)</span></label>
 </div>
 <div class="info" id="ast">MusicXML brings the melody with its lyrics and chord symbols. PDFs must contain real text: printed sheet music and Songsterr tabs can't be read. Recordings: the first 2.5 minutes, one harmonica, no backing music.</div>
 </div>
@@ -416,6 +416,7 @@ body.focusing{overflow:hidden}
 <div><label for="low">Ignore low notes (left hand)</label><select id="low"><option value="0">Off</option><option value="48">Below C3</option><option value="55">Below G3</option><option value="60">Below C4 (middle C)</option><option value="64">Below E4</option></select></div>
 <div style="align-self:end"><button id="sg" type="button" class="ghost" style="width:100%">Suggest best harmonica key</button></div>
 </div>
+<div class="row"><div style="flex:1 1 100%"><button id="mk" type="button" class="ghost" style="width:100%" title="Chord sheets are often written in an easier key than the recording (or for a guitar capo). Pick the song's mp3 and the app moves the tabs to the recording's key.">🎧 Match the key to a recording (mp3)…</button><input type="file" id="mkf" accept="audio/*,.mp3,.m4a,.wav,.ogg" hidden></div></div>
 <div class="info" id="sgout"></div>
 <label class="ck" style="margin-top:12px" title="Keeps the song in the key of the original recording, so you can play along with it. Melodies are only moved by whole octaves."><input type="checkbox" id="keepk" checked> Keep the original key (match the recording)</label>
 <label class="ck" style="margin-top:12px"><input type="checkbox" id="fold" checked> Move out-of-range notes by octave into range</label>
@@ -748,10 +749,10 @@ if(!part||part.drum){box.textContent='Pick a pitched track first.';return;}
 if(part.kind==='chords'){suggestChordKeys(part,box);return;}
 var notes=melody(part.notes).map(function(x){return x.n;});
 if(!notes.length)return;
-var res=[];
+var res=[],base0=shSel.value==='auto'?0:+shSel.value,bse=base0-12*Math.round(base0/12);
 Object.keys(KEYS).forEach(function(name){
 var best=null;
-[-24,-12,0,12,24].forEach(function(s){
+[-24+bse,-12+bse,bse,12+bse,24+bse].forEach(function(s){
 var sc=score(notes,s,KEYS[name])/notes.length-Math.abs(s)*0.0005;
 var pl=notes.filter(function(n){return MAP[n-KEYS[name]+s];}).length/notes.length;
 if(!best||sc>best.sc)best={name:name,s:s,sc:sc,pl:pl};
@@ -759,12 +760,12 @@ if(!best||sc>best.sc)best={name:name,s:s,sc:sc,pl:pl};
 res.push(best);
 });
 res.sort(function(a,b){return b.sc-a.sc;});
-box.appendChild(document.createTextNode('Best keys for this track (original pitch, octave shifts only). Tap one to apply:'));
+box.appendChild(document.createTextNode('Best keys for this track ('+(bse?'moved '+(bse>0?'+':'')+bse+' semitones':'original pitch')+', octave shifts only). Tap one to apply:'));
 box.appendChild(document.createElement('br'));
 res.slice(0,3).forEach(function(r){
 var b=document.createElement('button');
 b.type='button';b.style.cssText='margin:6px 6px 0 0';
-b.textContent=r.name+' \u00b7 '+Math.round(r.pl*100)+'% playable'+(r.s?' \u00b7 octave '+(r.s>0?'+':'')+(r.s/12):'');
+b.textContent=r.name+' \u00b7 '+Math.round(r.pl*100)+'% playable'+(r.s-bse?' \u00b7 octave '+(r.s>bse?'+':'')+((r.s-bse)/12):'');
 b.onclick=function(){keySel.value=r.name;shSel.value=String(r.s);render();};
 box.appendChild(b);
 });
@@ -1864,6 +1865,33 @@ document.getElementById('pskip').addEventListener('click',function(){if(!waitOn|
 trainerUI();
 // ===== v2.6: import chord sheets, text tabs, PDF and MusicXML; build chord bars by hand =====
 /*IMPORT-PARSERS-START*/
+// Text copied out of a PDF or a web page sometimes loses its line breaks, so each chord line runs straight into
+// its lyric ("A    D            Amaya maya mathu mayaA              D ..."). Put the breaks back so the chords sit above
+// their words again. Only very long lines with several chord-glued-to-word joins are touched.
+function unmergeSheet(text){
+var CH='[A-G](?:#|b|\u266f|\u266d)?(?:maj7|maj9|maj|m7b5|m7|m9|m6|m|dim7|dim|aug|sus2|sus4|sus|add9|add11|13|11|9|7|6|5)?(?:\\/[A-G](?:#|b)?)?',full=new RegExp('^'+CH+'$');
+var lines=text.replace(/\r/g,'').split('\n').filter(function(l){return !/^\s*```/.test(l)&&!/^\s*page\s+\d+\s*(\/|of)\s*\d+\s*$/i.test(l);});
+var solo={};lines.forEach(function(l){l.split(/\s+/).forEach(function(w){if(full.test(w))solo[w]=1;});});
+var glue=new RegExp('[a-z.,!?)\'\u2019]('+CH+')(?=\\s|[a-z])','g');
+function chordAt(s,i){var best=null,bestSolo=null;for(var L=1;L<=8&&i+L<=s.length;L++){var c=s.substr(i,L);if(!full.test(c))continue;var nx=s.charAt(i+L);
+if(nx===''||/\s/.test(nx)){best=c;if(solo[c])bestSolo=c;}else if(/[a-z]/.test(nx)){if(solo[c])bestSolo=c;if(!best)best=c;}}
+return bestSolo||best;}
+var out=[];
+lines.forEach(function(line){var sig=(line.match(glue)||[]).length;if(line.length<60||sig<2){out.push(line);return;}
+var i=0,n=line.length,mode='chord',cur='',hasCh=false;
+function flush(){if(mode==='chord'){if(hasCh)out.push(cur.replace(/\s+$/,''));}else if(cur.trim())out.push(cur.replace(/\s+$/,''));cur='';hasCh=false;}
+while(i<n){
+if(mode==='chord'){while(i<n&&line.charAt(i)===' '){cur+=' ';i++;}if(i>=n)break;
+var tk=chordAt(line,i);if(!tk){flush();mode='lyric';continue;}
+cur+=tk;hasCh=true;i+=tk.length;if(i<n&&/[^\s]/.test(line.charAt(i))){flush();mode='lyric';}continue;}
+var ch=line.charAt(i);
+if(/[A-G]/.test(ch)&&i>0&&/[a-z.,!?)'\u2019]/.test(line.charAt(i-1))){var t2=chordAt(line,i);if(t2){flush();mode='chord';continue;}}
+if(ch===' '){var j=i;while(j<n&&line.charAt(j)===' ')j++;if(j<n){var t3=chordAt(line,j);if(t3){var af=line.substr(j+t3.length,2);
+// two or more spaces before a chord name start a chord line; after one space the chord must be followed by a wide gap (or end the text)
+if((j-i>=2&&(af===''||/^[\s]|^[a-z]/.test(af)))||(af===''||af==='  '||(af.length===1&&af===' '&&j+t3.length+1>=n))){flush();mode='chord';continue;}}}}
+cur+=ch;i++;}
+flush();});
+return out.join('\n');}
 var SPELL=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'],PCN={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
 var CQ=[['maj9',[0,4,7,11]],['maj7',[0,4,7,11]],['ma7',[0,4,7,11]],['M7',[0,4,7,11]],['Δ7',[0,4,7,11]],['Δ',[0,4,7,11]],['maj',[0,4,7]],
 ['m7b5',[0,3,6,10]],['m7-5',[0,3,6,10]],['ø7',[0,3,6,10]],['ø',[0,3,6,10]],['min7',[0,3,7,10]],['min',[0,3,7]],['mi7',[0,3,7,10]],['mi',[0,3,7]],
@@ -2054,15 +2082,56 @@ return {title:title,parts:out,bpm:bpm||100,bpb:bpb||4};}
 // ---- harmonica fitting for chord symbols
 function shapePcSets(key){return shapes().map(function(s){var set={},n=0;s.notes.forEach(function(x){var p=(x+key)%12;if(!set[p]){set[p]=1;n++;}});return {set:set,n:n,s:s};});}
 function chordFit(pcs,sets){var best=-9,full=false;sets.forEach(function(S){var hit=0;pcs.forEach(function(p){if(S.set[p])hit++;});var extra=S.n-hit,sc=(hit-0.75*extra)/pcs.length;if(sc>best)best=sc;if(hit===pcs.length&&extra===0)full=true;});return {score:best,full:full};}
+// ---- match a part to a recording: compare the recording's pitch-class profile with the part's notes in all 12 keys
+function fftIP(re,im){var n=re.length,i,j,k,len,t;for(i=1,j=0;i<n;i++){var bit=n>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;if(i<j){t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t;}}
+for(len=2;len<=n;len<<=1){var ang=-2*Math.PI/len,wr=Math.cos(ang),wi=Math.sin(ang);for(i=0;i<n;i+=len){var cr=1,ci=0;for(k=0;k<len/2;k++){var a=i+k,b=a+len/2,xr=re[b]*cr-im[b]*ci,xi=re[b]*ci+im[b]*cr;
+re[b]=re[a]-xr;im[b]=im[a]-xi;re[a]+=xr;im[a]+=xi;var nr=cr*wr-ci*wi;ci=cr*wi+ci*wr;cr=nr;}}}}
+function audioChroma(buf){var sr=buf.sampleRate,nc=buf.numberOfChannels,c0=buf.getChannelData(0),c1=nc>1?buf.getChannelData(1):null,dec=Math.max(1,Math.round(sr/11025)),sr2=sr/dec,len=Math.floor(c0.length/dec);
+var x=new Float32Array(len);for(var i=0;i<len;i++){var s=0;for(var q=0;q<dec;q++){var idx=i*dec+q;s+=c0[idx]+(c1?c1[idx]:0);}x[i]=s/(dec*(c1?2:1));}
+var N=4096,hop=Math.max(N,Math.floor((len-N)/1200)),win=new Float32Array(N),chroma=new Array(12).fill(0),used=0,re=new Float32Array(N),im=new Float32Array(N);
+for(i=0;i<N;i++)win[i]=0.5-0.5*Math.cos(2*Math.PI*i/N);
+var kLo=Math.ceil(80*N/sr2),kHi=Math.min(N/2-2,Math.floor(2000*N/sr2)),pcOf=[];for(var k=0;k<=kHi;k++)pcOf[k]=k<kLo?-1:((Math.round(12*Math.log2(k*sr2/N/440))+69)%12+12)%12;
+for(var p0=0;p0+N<=len;p0+=hop){var en=0;for(i=0;i<N;i++){re[i]=x[p0+i]*win[i];im[i]=0;en+=re[i]*re[i];}if(en<1e-4)continue;fftIP(re,im);
+var mag=new Float32Array(kHi+2);for(k=kLo-1;k<=kHi+1;k++)mag[k]=Math.sqrt(re[k]*re[k]+im[k]*im[k]);
+var fc=new Array(12).fill(0),tot=0;for(k=kLo;k<=kHi;k++){if(mag[k]>mag[k-1]&&mag[k]>=mag[k+1]){var w=mag[k];fc[pcOf[k]]+=w;tot+=w;}}
+if(tot>0){for(q=0;q<12;q++)chroma[q]+=fc[q]/tot;used++;}}
+return used?chroma.map(function(v){return v/used;}):null;}
+// chord roots are what the bass plays, so they count extra
+function partChroma(part){var c=new Array(12).fill(0);part.notes.forEach(function(x){if(x.n==null)return;var d=Math.max(1,x.d||240);c[((x.n%12)+12)%12]+=d;if(x.sym){var p=parseChord(x.sym);if(p)c[((p.bass!=null?p.bass:p.root)%12+12)%12]+=d;}});return c;}
+function corr12(a,b){var ma=0,mb=0,i;for(i=0;i<12;i++){ma+=a[i];mb+=b[i];}ma/=12;mb/=12;var s=0,sa=0,sb=0;for(i=0;i<12;i++){s+=(a[i]-ma)*(b[i]-mb);sa+=(a[i]-ma)*(a[i]-ma);sb+=(b[i]-mb)*(b[i]-mb);}return s/Math.sqrt(sa*sb||1);}
+function keyShiftFor(pc,ac){var r=[];for(var s=-6;s<6;s++){var rot=new Array(12);for(var i=0;i<12;i++)rot[(i+s+12)%12]=pc[i];r.push({s:s,c:corr12(rot,ac)});}r.sort(function(a,b){return b.c-a.c;});return r;}
+function decodeLow(arr){var Off=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+return new Promise(function(res,rej){var done=function(b){res(b);},fail=function(){var c=actx||(actx=new (window.AudioContext||window.webkitAudioContext)());var p=c.decodeAudioData(arr.slice(0),done,function(e){rej(e||new Error('this audio format could not be read'));});if(p&&p.catch)p.catch(function(){});};
+try{if(!Off)return fail();var oc=new Off(1,11025,11025),p=oc.decodeAudioData(arr.slice(0),done,fail);if(p&&p.catch)p.catch(function(){});}catch(e){fail();}});}
+function matchRecording(file){var part=parts[+trSel.value],box=document.getElementById('sgout');
+if(!part||part.drum){box.textContent='Pick a pitched track first.';return;}
+box.textContent='Listening to the recording… (a few seconds)';
+file.arrayBuffer().then(decodeLow).then(function(buf){var ac=audioChroma(buf);if(!ac)throw new Error('the recording seems to be silent');
+// a tune alone does not sound like the full band: use every pitched track of the song (they all share one key)
+var pc=new Array(12).fill(0);parts.forEach(function(q){if(q.drum||q.fromSheet&&part.kind==='chords')return;var c=partChroma(q);for(var i=0;i<12;i++)pc[i]+=c[i];});if(!pc.some(function(v){return v>0;}))pc=partChroma(part);
+var r=keyShiftFor(pc,ac),s=r[0].s,sure=r[0].c-r[1].c;
+if(r[0].c<0.35){box.textContent='Could not match this recording to the song (the notes do not line up in any key). Is it the same song?';return;}
+var val=s;
+if(part.kind!=='chords'){var notes=melody(part.notes).map(function(x){return x.n;}),key=KEYS[keySel.value],bv=null,bs=-1;[s-12,s,s+12].forEach(function(v){var sc=score(notes,v,key);if(sc>bs){bs=sc;bv=v;}});val=bv;}
+if(s!==0){shSel.value=String(val);render();}
+var nm2=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+box.textContent=(s===0?'The recording is in the same key as this '+(part.kind==='chords'?'chord sheet':'track')+'. Nothing to change.':
+'The recording is '+Math.abs(s)+' semitone'+(Math.abs(s)>1?'s':'')+' '+(s>0?'higher':'lower')+' than this '+(part.kind==='chords'?'chord sheet (often the sheet is written for a guitar capo)':'track')+'. Moved the song '+(s>0?'+':'')+s+' so it matches.')+
+(sure<0.1?' (Not fully sure: check by playing along.)':'')+' ';
+var b=document.createElement('button');b.type='button';b.className='ghost sm';b.textContent='Now suggest a harmonica key';b.onclick=function(){document.getElementById('sg').click();};box.appendChild(b);
+}).catch(function(e){box.textContent='Could not read that file: '+(e&&e.message||e);});}
+document.getElementById('mk').addEventListener('click',function(){document.getElementById('mkf').click();});
+document.getElementById('mkf').addEventListener('change',function(e){var f=e.target.files[0];if(f)matchRecording(f);e.target.value='';});
 function bestChordShift(part,key){var syms=part.notes.filter(function(x){return x.sym;}).map(function(x){return parseChord(x.sym);}).filter(Boolean);if(!syms.length)return 0;
 var sets=shapePcSets(key),best=0,bs=-1e9;for(var s=-6;s<=6;s++){var sc=0;syms.forEach(function(p){sc+=chordFit(p.pcs.map(function(x){return (x+s+12)%12;}),sets).score;});sc-=Math.abs(s)*0.02;if(sc>bs){bs=sc;best=s;}}return best;}
 function suggestChordKeys(part,box){var syms=part.notes.filter(function(x){return x.sym;}).map(function(x){return parseChord(x.sym);}).filter(Boolean);
 box.textContent='';if(!syms.length){box.textContent='There are no chord symbols in this track.';return;}
-var res=Object.keys(KEYS).map(function(name){var sets=shapePcSets(KEYS[name]),full=0,sc=0;syms.forEach(function(p){var f=chordFit(p.pcs,sets);if(f.full)full++;sc+=f.score;});return {name:name,full:full,sc:sc};});
+var base=document.getElementById('sh').value==='auto'?0:+document.getElementById('sh').value;
+var res=Object.keys(KEYS).map(function(name){var sets=shapePcSets(KEYS[name]),full=0,sc=0;syms.forEach(function(p){var f=chordFit(p.pcs.map(function(x){return (x+base%12+24)%12;}),sets);if(f.full)full++;sc+=f.score;});return {name:name,full:full,sc:sc};});
 res.sort(function(a,b){return b.full-a.full||b.sc-a.sc;});
-box.appendChild(document.createTextNode('Best harmonica keys for these chords (song left in its original key). Tap one to use it:'));box.appendChild(document.createElement('br'));
+box.appendChild(document.createTextNode('Best harmonica keys for these chords ('+(base?'song moved '+(base>0?'+':'')+base+' semitones':'song left in its original key')+'). Tap one to use it:'));box.appendChild(document.createElement('br'));
 res.slice(0,3).forEach(function(r){var b=document.createElement('button');b.type='button';b.className='ghost sm';b.style.margin='6px 6px 0 0';
-b.textContent=r.name+' · '+Math.round(100*r.full/syms.length)+'% of chords in full';b.onclick=function(){keySel.value=r.name;shSel.value='0';document.getElementById('pkey').value=r.name;render();};box.appendChild(b);});}
+b.textContent=r.name+' · '+Math.round(100*r.full/syms.length)+'% of chords in full';b.onclick=function(){keySel.value=r.name;shSel.value=String(base);document.getElementById('pkey').value=r.name;render();};box.appendChild(b);});}
 // ---- open imported parts in the player
 function openParts(list,meta){meta=meta||{};
 audioNotes=[];ppq=meta.ppq||480;bpb=meta.bpb||4;document.getElementById('ts').value=String(bpb);
@@ -2079,7 +2148,7 @@ if(r.tabs.length){var tn=parseAsciiTab(r.tabs,b,480);if(tn&&tn.length)list.push(
 if(!list.length){toast('No chords or guitar tab found. Chord lines should hold only chord names (like  G   Am   D7) above the lyrics.');return false;}
 var msg='Found '+(r.events.length?r.events.length+' chords':'')+(r.events.length&&list.length>1?' and ':'')+(list.length>1||!r.events.length?'a guitar tab':'')+(r.capo?' (capo '+r.capo+': chords shown as they sound)':'')+'.';
 openParts(list,{bpb:b,bpm:opts.bpm||(r.events.length?80:90),msg:msg});return true;}
-function textToLines(text){return text.replace(/\r/g,'').replace(/\t/g,'    ').split('\n').map(function(t){var xs=[];for(var i=0;i<t.length;i++)xs.push(i);return {text:t,xs:xs};});}
+function textToLines(text){return unmergeSheet(text).replace(/\r/g,'').replace(/\t/g,'    ').split('\n').map(function(t){var xs=[];for(var i=0;i<t.length;i++)xs.push(i);return {text:t,xs:xs};});}
 // ---- PDF (text PDFs only) via pdf.js, loaded on first use
 var pdfjsP=null,PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
 function loadPdfJs(){if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);if(pdfjsP)return pdfjsP;
@@ -2167,7 +2236,7 @@ kk.addEventListener('change',function(){try{localStorage.setItem('harmonica-keep
 </script>
 <script>
 (function(){
-var APP_VERSION='3.4';
+var APP_VERSION='3.5';
 document.getElementById('vnum').textContent=APP_VERSION;
 var upd=document.getElementById('upd'),vst=document.getElementById('vst');
 function hardUpdate(){
