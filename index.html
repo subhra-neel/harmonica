@@ -316,6 +316,7 @@ body.focusing{overflow:hidden}
 <label class="filebtn"><input id="af" type="file" accept="audio/*,.mp3,.m4a,.wav,.ogg,.webm"><b>🎙 Recording / song mp3</b><span>solo harmonica, your humming or singing, or a full song: the app finds the tune</span></label>
 </div>
 <label class="mini" style="margin-top:10px;display:block">The recording is<select id="amode"><option value="auto" selected>Let the app decide</option><option value="solo">One instrument or voice alone</option><option value="song">A full song (singer with band)</option></select></label>
+<label class="mini" style="margin-top:8px;display:block">From a full song, take<select id="apart"><option value="all" selected>The whole tune (intro and solos too)</option><option value="voice">Just the singing</option></select></label>
 <div class="info" id="ast">MusicXML brings the melody with its lyrics and chord symbols. PDFs must contain real text: printed sheet music and Songsterr tabs can't be read. Recordings up to 8 minutes. Solo playing or humming gives the most exact notes. For a full song the app follows the main tune; in the intro and solos that is the lead instrument, and fast vocal ornaments are simplified.</div>
 </div>
 <div class="card">
@@ -553,6 +554,7 @@ body.focusing{overflow:hidden}
 <li><b>MuseScore</b>: download <b>MIDI</b> or <b>MusicXML</b> (not the PDF). MusicXML also brings lyrics and chord symbols.</li>
 <li><b>Ultimate Guitar</b> and other chord sites: copy the chords and lyrics and paste them into Songs, or open a text PDF. Text guitar tabs work too.</li>
 <li>Or type your own chords bar by bar in <b>Build your own chord bars</b>.</li>
+<li><b>A song mp3</b>: open it with <b>🎙 Recording / song mp3</b>. Choose <b>The whole tune</b> (intro and solos too) or <b>Just the singing</b>. Singing comes out best when the voice is the loudest part of the mix; humming the tune yourself is still the most exact.</li>
 </ul>
 <h3>Good to know</h3>
 <ul>
@@ -1660,6 +1662,23 @@ for(var b=60;b<=180;b++){var err=0;ts.forEach(function(t){var g=t*b/60*2;err+=Ma
 // Harmonic-sum pitch salience, a smooth path through it (Viterbi), then notes. Bass is left out by range.
 function monoLow(ab,maxSec){var chn=ab.numberOfChannels,sr0=ab.sampleRate,len=Math.min(ab.length,Math.floor(sr0*maxSec)),fct=Math.max(1,Math.round(sr0/22050)),sr=sr0/fct,n=Math.floor(len/fct),x=new Float32Array(n);
 for(var c=0;c<chn;c++){var dd=ab.getChannelData(c);for(var i=0;i<n;i++){var sm=0;for(var k=0;k<fct;k++)sm+=dd[i*fct+k];x[i]+=sm/fct/chn;}}return {x:x,sr:sr};}
+// just the voice: a sung line keeps moving (vibrato, slides, notes between the keys), while keyboards, guitars and most
+// tuned instruments sit still on exact notes. Score each stretch of melody on that, smooth over ±1.5 s, keep the sung parts.
+function voiceFrames(pm,ps,on,dt){var nf=pm.length,f,devs=[];for(f=0;f<nf;f++)if(on[f])devs.push(pm[f]-Math.round(pm[f]));devs.sort(function(a,b){return a-b;});var tune=devs.length?devs[devs.length>>1]:0;
+var cons=[],s0=-1;for(f=0;f<=nf;f++){var cont=f<nf&&on[f]&&s0>=0&&Math.abs(pm[f]-pm[f-1])<1.5;if(cont)continue;if(s0>=0){cons.push([s0,f]);s0=-1;}if(f<nf&&on[f])s0=f;}
+var info=cons.map(function(c){var a=c[0],b=c[1],n=b-a,mv=0,off=0,wob=0,i;if(n<5)return null;
+for(i=a+1;i<b;i++)mv+=Math.abs(pm[i]-pm[i-1]);mv/=n-1;
+for(i=a;i<b;i++){var q=pm[i]-tune;if(Math.abs(q-Math.round(q))>0.25)off++;}off/=n;
+var m2=0,cnt=0;for(i=a+4;i<b-4;i++){var sm=0;for(var j=i-4;j<=i+4;j++)sm+=pm[j];wob+=Math.pow(pm[i]-sm/9,2);cnt++;}
+if(cnt)wob=Math.sqrt(wob/cnt);else{var mean=0;for(i=a;i<b;i++)mean+=pm[i];mean/=n;for(i=a;i<b;i++)m2+=Math.pow(pm[i]-mean,2);wob=Math.sqrt(m2/n);}
+return {a:a,b:b,mid:(a+b)/2*dt,dur:n*dt,sc:(wob-0.1)/0.1+(off-0.05)/0.1+(mv-0.1)/0.05};}).filter(Boolean);
+info.forEach(function(c){var num=0,den=0;info.forEach(function(o){if(Math.abs(o.mid-c.mid)<=1.5){num+=o.sc*o.dur;den+=o.dur;}});c.sm=den?num/den:-9;});
+// singers differ (a crooner barely wobbles): split this song's own scores into two groups (Otsu), within sensible limits
+var thr=1;if(info.length>6){var vals=info.map(function(c){return c.sm;}).sort(function(a,b){return a-b;}),bestV=-1;
+for(var k=1;k<vals.length;k++){var t=(vals[k-1]+vals[k])/2,w0=0,w1=0,m0=0,m1=0;info.forEach(function(c){if(c.sm<=t){w0+=c.dur;m0+=c.sm*c.dur;}else{w1+=c.dur;m1+=c.sm*c.dur;}});
+if(!w0||!w1)continue;m0/=w0;m1/=w1;var bv=w0*w1*(m0-m1)*(m0-m1);if(bv>bestV){bestV=bv;thr=t;}}thr=Math.max(-1.5,Math.min(1,thr));}
+var out=new Uint8Array(nf);info.forEach(function(c){if(c.sm>thr)for(var i=c.a;i<c.b;i++)out[i]=1;});voiceFrames.thr=thr;
+return out;}
 function songNotes(pm,ps,on,dt){var nf=pm.length,f,z;
 // smooth the pitch line a little (vibrato and slides), then find the tuning offset
 var sm=new Float32Array(nf);for(f=0;f<nf;f++){if(!on[f]){sm[f]=pm[f];continue;}var w=[];for(z=Math.max(0,f-5);z<=Math.min(nf-1,f+5);z++)if(on[z])w.push(pm[z]);w.sort(function(p,q){return p-q;});sm[f]=w[w.length>>1];}
@@ -1714,6 +1733,7 @@ var path=new Int16Array(nf),bb=0,bs=-1e18;for(b=0;b<NB;b++)if(score[b]>bs){bs=sc
 var srtE=Array.prototype.slice.call(fe).sort(function(p,q){return p-q;}),eRef=srtE[Math.floor(srtE.length*0.95)]||1,pm=new Float32Array(nf),on=new Uint8Array(nf),ps=new Float32Array(nf);
 for(f=0;f<nf;f++){var pb=path[f],sa=pb>0?sal[f*NB+pb-1]:0,sb=sal[f*NB+pb],sc=pb<NB-1?sal[f*NB+pb+1]:0,den=sa-2*sb+sc,off=den?0.5*(sa-sc)/den:0;if(off>0.5||off<-0.5)off=0;
 pm[f]=69+12*Math.log2(FMIN*Math.pow(2,(pb+off)*BC/1200)/440);ps[f]=sb/norm;on[f]=fe[f]>eRef*0.02&&ps[f]>0.2?1:0;}
+detectSong.keptFrac=1;if(detectSong.voiceOnly){var n1=0,n2=0,vf2=voiceFrames(pm,ps,on,HOP/sr);for(f=0;f<nf;f++){if(on[f])n1++;if(vf2[f])n2++;}detectSong.keptFrac=n1?n2/n1:0;on=vf2;}
 detectSong.raw={pm:pm,ps:ps,on:on,dt:HOP/sr};var notes=songNotes(pm,ps,on,HOP/sr);if(!notes.length)return [];
 // tempo: the beat period whose multiples (beat, 2 beats, bar, 2 bars) repeat most in the onset envelope, leaning towards 70–130 bpm
 var dtf=HOP/sr,mean=0;for(f=0;f<nf;f++)mean+=flux[f];mean/=nf;var ev=new Float32Array(nf);for(f=0;f<nf;f++)ev[f]=Math.max(0,flux[f]-mean);
@@ -1778,7 +1798,8 @@ var ab=await ac.decodeAudioData(await f.arrayBuffer());
 if(ac.close)ac.close();
 var mode=document.getElementById('amode')?document.getElementById('amode').value:'auto',res=null,how='';
 if(mode!=='song'){res=await detect(ab,st);}
-if(mode==='song'||(mode==='auto'&&detect.pitched<0.3)){res=await detectSong(ab,st);how=' (full song: followed the main tune; intro and solo parts give the lead instrument\u2019s line)';}
+if(mode==='song'||(mode==='auto'&&detect.pitched<0.3)){var vo=document.getElementById('apart').value==='voice';detectSong.voiceOnly=vo;res=await detectSong(ab,st);
+how=vo?' (full song: just the singing, instruments left out)'+(detectSong.keptFrac<0.35?'. Only a little clear singing was found: in this song the instruments are often louder than the voice. If tunes are missing, choose \u201cThe whole tune\u201d':''):' (full song: followed the main tune; intro and solo parts give the lead instrument\u2019s line)';}
 if(res.length<2)throw new Error('No clear notes found. Try a solo recording without backing music.');
 audioNotes=res;
 document.getElementById('bpm').value=(how&&detectSong.bpm)?detectSong.bpm:guessBpm(res);
@@ -2399,7 +2420,7 @@ kk.addEventListener('change',function(){try{localStorage.setItem('harmonica-keep
 </script>
 <script>
 (function(){
-var APP_VERSION='3.7';
+var APP_VERSION='3.8';
 document.getElementById('vnum').textContent=APP_VERSION;
 var upd=document.getElementById('upd'),vst=document.getElementById('vst');
 function hardUpdate(){

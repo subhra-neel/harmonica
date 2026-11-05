@@ -38,3 +38,7 @@ Change the version number in three places: `APP_VERSION` in index.html, `VERSION
 ### New in 3.7
 - **Help → Fixing a wrong note**: an animated walk-through of the piano roll (select a note, ♭/♯, Earlier/Later, Delete, Undo, Play from here).
 - **Long silences** (under the bars): Keep / Shorten to 1 bar / Remove. Bars where the tune rests are taken out for Play, Play & wait and Perform. When the song's backing band plays along, the original timing is kept so you stay in time with it.
+
+### New in 3.8
+- **Song mp3: the whole tune or just the singing.** In Songs, under the recording button, pick *From a full song, take: The whole tune / Just the singing*. Just the singing keeps the parts that move like a voice (vibrato, slides, notes between the keys) and leaves out keyboards, guitars and other steady instruments. If little singing is found (instruments louder than the voice), the app says so.
+- Tip: combine *Just the singing* with *Long silences: Shorten* for a compact practice version.
