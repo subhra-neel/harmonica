@@ -136,6 +136,14 @@ background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--bd) 70%,trans
 .chip.rest{background:transparent;color:var(--mut);border-style:dashed;font-size:1.5rem;font-weight:700;cursor:default}
 .barlab{font-size:.72rem;color:var(--mut);flex:1 0 100%;margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
 .chip{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:54px;min-height:56px;padding:6px 10px;background:var(--bg);color:var(--fg);border:1.5px solid var(--bd);border-radius:10px;line-height:1.15}
+.sl{position:relative;display:inline-block;line-height:1}
+.sl.tv::before{content:'';position:absolute;left:50%;top:-.5em;width:.13em;min-width:1.5px;height:.42em;background:currentColor;border-radius:1px;transform:translateX(-50%) rotate(-38deg)}
+.sl[data-o]::after{position:absolute;left:50%;transform:translateX(-50%);font-size:1.1em;font-weight:900;line-height:1;letter-spacing:-.12em;white-space:nowrap}
+.sl[data-o="1"]::after,.sl[data-o="2"]::after{top:-.78em}.sl[data-o="-1"]::after,.sl[data-o="-2"]::after{bottom:-.72em}
+.sl[data-o="1"]::after,.sl[data-o="-1"]::after{content:'\2022'}.sl[data-o="2"]::after,.sl[data-o="-2"]::after{content:'\2022\2022'}
+.sl.tv[data-o="1"]::after,.sl.tv[data-o="2"]::after{top:-1.25em}
+.chip i .sw,.hc .sw{display:inline-block;padding:.7em 0 .55em;line-height:1}
+.swkey{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.swkey>span{display:inline-flex;flex-direction:column;align-items:center;min-width:3.4em;border:1px solid var(--bd);border-radius:8px;padding:2px 6px 4px;font-size:1rem}.swkey>span .sw{padding:.6em 0 .2em;line-height:1}.swkey>span small{font-size:.7rem;color:var(--mut)}
 .chip b{font-size:1.3rem;font-weight:700}.chip i{font-style:normal;font-size:.72rem;color:var(--mut)}
 .chip.bad{border-color:var(--bad)}
 .chip.on{background:var(--ac);color:var(--acfg);border-color:var(--fg);transform:scale(1.06)}.chip.on i{color:var(--acfg)}
@@ -406,6 +414,7 @@ body.focusing{overflow:hidden}
 <div class="legend" id="hplg">Each bar has a beat ruler: count <b>1 &amp; 2 &amp; 3 &amp; 4 &amp;</b>. A card starts on the beat above it and its width is how long the note lasts. A gap with · is silence; ── means keep holding the note from the bar before. Tap a tab to hear it and see it on the harmonica. Orange = blow (breathe out), blue = draw (breathe in), dashed or ◂ = slide button in, faded = bends.</div>
 <div class="optrow">
 <label class="ck"><input type="checkbox" id="nn"> Note names in tabs</label>
+<label class="ck">Names <select id="nota2" class="nota" aria-label="Note names"><option value="w">C D E</option><option value="s">Sa Re Ga</option><option value="b">Both</option></select></label>
 <label class="ck"><input type="checkbox" id="cho"> Chords (several holes)</label>
 <label class="ck">Bars <select id="blay"><option value="vert">Vertical (one bar per line)</option><option value="horiz">Horizontal (side by side)</option></select></label>
 <label class="ck" title="Songs often have long stretches where the tune rests (intros, solos). Shorten them for practice. Kept as they are while the backing band plays, so you stay in time with it.">Long silences <select id="gaps"><option value="keep">Keep, as in the song</option><option value="one">Shorten to 1 bar</option><option value="none">Remove</option></select></label>
@@ -482,6 +491,14 @@ body.focusing{overflow:hidden}
 </div>
 <label for="tstyle">Tab style</label>
 <select id="tstyle"><option value="std">Numbers: 4 = blow, -4 = draw</option><option value="arrow">Arrows: ↑4 = blow, ↓4 = draw</option></select>
+<div class="row" style="margin-top:12px">
+<div><label for="nota">Note names</label><select id="nota" class="nota"><option value="w">Western: C D E F</option><option value="s">Indian sargam: Sa Re Ga Ma</option><option value="b">Both: Ga · E4</option></select></div>
+<div><label for="swl">Sargam labels</label><select id="swl"><option value="full">Full: Sa Re Ga Ma Pa Dha Ni</option><option value="short">Short: S R G M P D N</option></select></div>
+</div>
+<label for="sasel">Sa (the home note)</label>
+<select id="sasel"><option value="harp">Harmonica key (C harp: Sa = C, G harp: Sa = G)</option><option value="0">C</option><option value="1">C♯ / D♭</option><option value="2">D</option><option value="3">D♯ / E♭</option><option value="4">E</option><option value="5">F</option><option value="6">F♯ / G♭</option><option value="7">G</option><option value="8">G♯ / A♭</option><option value="9">A</option><option value="10">A♯ / B♭</option><option value="11">B</option></select>
+<div class="info" id="swhelp"></div>
+<div class="swkey" id="swkey"></div>
 </div>
 <div class="card">
 <h2>Microphone</h2>
@@ -657,7 +674,30 @@ var cho=document.getElementById('cho').checked,cur=null;
 sorted.forEach(function(x){if(x.t-last>tol){out.push(x);last=x.t;cur=x;x.ch=[];}else if(cho&&cur&&x.n!==cur.n&&cur.ch.indexOf(x.n)<0&&cur.ch.length<3){cur.ch.push(x.n);}});
 return out;
 }
-function nm(m){return NN[((m%12)+12)%12]+(Math.floor(m/12)-1);}
+function nmW(m){return NN[((m%12)+12)%12]+(Math.floor(m/12)-1);}
+// ---- note names: Western or Indian sargam (Sa Re Ga). Capital = shuddha, small = komal, ` on Ma = tivra; dot below = mandra, dot above = taar
+var NOTA={mode:'w',lab:'full',sa:'harp'};
+try{var _nt=JSON.parse(localStorage.getItem('harmonica-notation')||'null');if(_nt){if(/^[wsb]$/.test(_nt.mode))NOTA.mode=_nt.mode;if(/^(full|short)$/.test(_nt.lab))NOTA.lab=_nt.lab;if(_nt.sa==='harp'||/^([0-9]|1[01])$/.test(String(_nt.sa)))NOTA.sa=String(_nt.sa);}}catch(e){}
+var SW_F=['Sa','re','Re','ga','Ga','Ma','Ma','Pa','dha','Dha','ni','Ni'],SW_S=['S','r','R','g','G','M','M','P','d','D','n','N'];
+function saPc(){if(NOTA.sa!=='harp')return +NOTA.sa;var k=document.getElementById('key'),v=k?KEYS[k.value]:0;return (((v||0)%12)+12)%12;}
+// madhya (middle) Sa = the harmonica's home note around hole 4 blow on a diatonic (C5 on a C harp, G4 on a G harp)
+function saMid(){var pc=saPc();return 72+(pc<=6?pc:pc-12);}
+function swInfo(m){var d=m-saMid(),i=((d%12)+12)%12,o=Math.floor(d/12);return {txt:(NOTA.lab==='short'?SW_S:SW_F)[i],tv:i===6,o:Math.max(-2,Math.min(2,o))};}
+function swText(m){var s=swInfo(m),c=s.txt.charAt(0);if(s.tv)c+='\u0300';c+=['\u0324','\u0323','','\u0307','\u0308'][s.o+2];return c+s.txt.slice(1);}
+function nm(m){if(NOTA.mode==='w')return nmW(m);var t=swText(m);return NOTA.mode==='b'?t+' \u00b7 '+nmW(m):t;}
+// same name drawn with CSS marks (for tab cards and the harmonica chart)
+function nmEl(m,host){host.textContent='';if(NOTA.mode==='w'){host.textContent=nmW(m);return;}
+var s=swInfo(m),w=document.createElement('span'),l=document.createElement('span');w.className='sw';l.className='sl'+(s.tv?' tv':'');if(s.o)l.setAttribute('data-o',String(s.o));l.textContent=s.txt.charAt(0);w.appendChild(l);if(s.txt.length>1)w.appendChild(document.createTextNode(s.txt.slice(1)));
+host.appendChild(w);if(NOTA.mode==='b')host.appendChild(document.createTextNode(' \u00b7 '+nmW(m)));host.title=nm(m)+(NOTA.mode==='s'?'  ('+nmW(m)+')':'');}
+function swRoot(pc){var i=((pc-saPc())%12+12)%12,t=(NOTA.lab==='short'?SW_S:SW_F)[i];return i===6?t.charAt(0)+'\u0300'+t.slice(1):t;}
+var PCI={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+function accOf(a){return a==='\u266f'||a==='#'?1:(a==='\u266d'||a==='b'?-1:0);}
+// chord names (C, Am/E, F#m7, C4+E4) shown in the chosen notation; chords keep their Western names inside the app
+function cdisp(s){if(!s||NOTA.mode==='w')return s;var out;
+if(/\+/.test(s)){out=s.split('+').map(function(q){var m=/^([A-G])([\u266f\u266d#b]?)(-?\d+)$/.exec(q);return m?swText((+m[3]+1)*12+PCI[m[1]]+accOf(m[2])):q;}).join('+');}
+else{var m=/^([A-G])([\u266f\u266d#b]?)(.*?)(?:\/([A-G])([\u266f\u266d#b]?))?(\s*\u2248)?$/.exec(s);if(!m)return s;
+out=swRoot(PCI[m[1]]+accOf(m[2]))+(m[3]?' '+m[3]:'')+(m[4]?'/'+swRoot(PCI[m[4]]+accOf(m[5])):'')+(m[6]||'');}
+return NOTA.mode==='b'?out+' ('+s.replace(/\s*\u2248$/,'')+')':out;}
 
 // ---- render
 function render(){
@@ -721,7 +761,7 @@ mel.forEach(function(x){
 var b=Math.floor(x.t/bar),bt=Math.floor((x.t%bar)/beat);
 beats[b]=beats[b]||blank();
 var tk=T(tokOf(x));
-if(!part.drum&&document.getElementById('nn').checked){var cc2=chordOf(x);if(cc2)tk+='('+cc2.name+')';else{var rr=res(x);if(rr)tk+='('+nm(rr.p)+')';}}
+if(!part.drum&&document.getElementById('nn').checked){var cc2=chordOf(x);if(cc2)tk+='('+cdisp(cc2.name)+')';else{var rr=res(x);if(rr)tk+='('+nm(rr.p)+')';}}
 beats[b][Math.min(bpb-1,bt)].push(tk);
 if(b>maxBar)maxBar=b;
 });
@@ -854,7 +894,7 @@ var lo=1e9,hi=-1e9,endT=0;
 roll.forEach(function(r){(r.ps||[r.p]).forEach(function(pp){if(pp<lo)lo=pp;if(pp>hi)hi=pp;});if(r.t+r.d>endT)endT=r.t+r.d;});
 lo-=1;hi+=1;
 // long songs: keep the canvas within what tablets can hold (a huge canvas is slow and can run out of memory)
-var RH=20,G=36,PPB=70,H=(hi-lo+1)*RH,endB=endT/ppq,MAXW=16000;
+var RH=20,G=NOTA.mode==='b'?62:36,PPB=70,H=(hi-lo+1)*RH,endB=endT/ppq,MAXW=16000;
 if(G+endB*PPB+20>MAXW)PPB=Math.max(16,Math.floor((MAXW-G-20)/Math.max(1,endB)));
 var W=G+Math.ceil(endB*PPB)+20,dpr=Math.min(2,window.devicePixelRatio||1);
 if(W*dpr>MAXW)dpr=Math.max(1,MAXW/W);if(W*dpr*H*dpr>48e6)dpr=Math.max(0.5,Math.sqrt(48e6/(W*H)));
@@ -862,7 +902,7 @@ geo={hi:hi,RH:RH,G:G,PPB:PPB,H:H};
 var cw=Math.round(W*dpr),ch=Math.round(H*dpr);if(cv.width!==cw)cv.width=cw;if(cv.height!==ch)cv.height=ch;cv.style.width=W+'px';cv.style.height=H+'px';
 var c=cv.getContext('2d');c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,cw,ch);c.scale(dpr,dpr);
 c.font='10px system-ui,sans-serif';c.textBaseline='middle';
-for(var p=lo;p<=hi;p++){var y=(hi-p)*RH,blk=[1,3,6,8,10].indexOf(((p%12)+12)%12)>=0;
+for(var p=lo;p<=hi;p++){var y=(hi-p)*RH,blk=[1,3,6,8,10].indexOf((((p-(NOTA.mode==='w'?0:saPc()))%12)+12)%12)>=0;
 if(blk){c.fillStyle=bd;c.globalAlpha=0.35;c.fillRect(G,y,W-G,RH);c.globalAlpha=1;}
 c.strokeStyle=bd;c.beginPath();c.moveTo(G,y+RH);c.lineTo(W,y+RH);c.stroke();
 c.fillStyle=mut;c.fillText(nm(p),3,y+RH/2);}
@@ -877,7 +917,7 @@ var x=G+r.t/ppq*PPB,w=Math.max(10,r.d/ppq*PPB-2),y=(hi-r.p)*RH+1;
 if(r.tok==='?'){c.strokeStyle='#d33';c.lineWidth=2;c.strokeRect(x,y,w,RH-2);c.lineWidth=1;c.fillStyle=fg;}
 else{c.fillStyle=ac;c.fillRect(x,y,w,RH-2);c.fillStyle=acfg;}
 c.font='bold 11px system-ui,sans-serif';
-var lab=(r.cn||nm(r.p))+(w>(r.ps?80:52)&&r.tok!=='?'?'  '+T(r.tok):'');
+var lab=(r.cn?cdisp(r.cn):nm(r.p))+(w>(r.ps?80:52)&&r.tok!=='?'?'  '+T(r.tok):'');
 c.fillText(lab,x+3,y+(RH-2)/2);
 if(r.src===sel){c.strokeStyle=fg;c.lineWidth=2.5;c.strokeRect(x-1,y-1,w+2,RH);c.lineWidth=1;}});
 if(attempt&&attempt.part===parts[+trSel.value]&&document.getElementById('rt').checked){c.fillStyle='#2a9d4a';
@@ -891,7 +931,7 @@ ns.forEach(function(n){var p=((n%12)+12)%12;if(pcs.indexOf(p)<0)pcs.push(p);});
 var bp=((bass%12)+12)%12,order=[bp].concat(pcs.filter(function(p){return p!==bp;}));
 for(var i=0;i<order.length;i++){var r=order[i],rel=pcs.map(function(p){return (p-r+12)%12;}).sort(function(a,b){return a-b;}).join(',');
 if(TPL[rel]!=null)return NN[r]+TPL[rel]+(r!==bp?'/'+NN[bp]:'');}
-return ns.map(function(n){return nm(n);}).join('+');}
+return ns.map(function(n){return nmW(n);}).join('+');}
 var shCache={};
 function shapes(){
 var chr=(MAP===CHR),ck=chr?'c':'d';if(shCache[ck])return shCache[ck];
@@ -913,11 +953,12 @@ document.getElementById('bk').addEventListener('change',function(){if(g.value!==
 function nBars(){var e=0;roll.forEach(function(r){if(r.t+r.d>e)e=r.t+r.d;});return Math.max(1,Math.ceil(e/(ppq*bpb)));}
 function showTok(tok){var set=Array.isArray(tok)?tok:(tok?[tok]:[]),cs=document.querySelectorAll('#hp .hc,#hp2 .hc');for(var i=0;i<cs.length;i++)cs[i].classList.toggle('on',set.indexOf(cs[i].dataset.tok)>=0);}
 function buildHarp(target){
+if(window.notaSync)notaSync();
 var hp=target||document.getElementById('hp'),key=KEYS[document.getElementById('key').value],chr=(MAP===CHR),N=chr?12:10;
 hp.innerHTML='';hp.style.setProperty('--n',String(N));
 var rc='';function el(cls,txt,tok){var d=document.createElement('div');d.className=cls+rc;if(txt!=null)d.textContent=txt;if(tok!=null)d.dataset.tok=tok;hp.appendChild(d);return d;}
 function row(label,list){if(!list.length)return;var by={};list.forEach(function(c){by[c.h]=c;});rc=/Bend/.test(label)?' rbend':'';
-el('hl',label);for(var h=1;h<=N;h++){var c=by[h];if(c)el('hc '+c.cls,nm(c.n+key),c.tok);else el('',null);}rc='';}
+el('hl',label);for(var h=1;h<=N;h++){var c=by[h];if(c){var hd=el('hc '+c.cls,null,c.tok);nmEl(c.n+key,hd);}else el('',null);}rc='';}
 function nums(){el('hl','Hole');for(var h=1;h<=N;h++)el('hn',String(h));}
 var bl=[],dr=[],i,h;
 if(chr){var bi=[],di=[];
@@ -956,8 +997,8 @@ var rs=document.createElement('span');rs.className='chip rest';rs.title='Silence
 bar.appendChild(g);box.appendChild(bar);}
 if(window.focusApply)focusApply();}
 function mkChip(i){var r=roll[i],d=document.createElement('button');d.type='button';d.className='chip'+(r.tok==='?'?' bad':'');d.dataset.i=i;
-if(r.csym){var cs=document.createElement('span');cs.className='cs';cs.textContent=r.csym;d.appendChild(cs);}
-var t=document.createElement('b');t.textContent=T(r.tok);var n=document.createElement('i');n.textContent=r.cn||nm(r.p);d.appendChild(t);d.appendChild(n);
+if(r.csym){var cs=document.createElement('span');cs.className='cs';cs.textContent=cdisp(r.csym);d.appendChild(cs);}
+var t=document.createElement('b');t.textContent=T(r.tok);var n=document.createElement('i');if(r.cn)n.textContent=cdisp(r.cn);else nmEl(r.p,n);d.appendChild(t);d.appendChild(n);
 if(r.lyr){var u=document.createElement('u');u.textContent=r.lyr;d.title=r.lyr;d.appendChild(u);}
 d.onclick=function(){sel=r.src;beepR(r);showTok(r.holes||r.tok);showDetail(r);draw(null);};return d;}
 function setRange(){
@@ -1246,7 +1287,7 @@ var ci=cur?cur.i:-1;if(ci!==curI)setCur(ci);
 if(cur&&cur.ps.length===1){var tn=nm(cur.ps[0]);
 if(m!=null){var cents=Math.round((m-cur.ps[0])*100);stat.textContent='Target '+tn+'   You '+nm(Math.round(m))+'  ('+(cents>0?'+':'')+cents+' cents)';mk.style.left=(50+Math.max(-50,Math.min(50,cents)))+'%';}
 else{stat.textContent='Target '+tn+'   (listening)';mk.style.left='50%';}}
-else if(cur){stat.textContent='Chord '+(cur.r.cn||'')+'   heard '+c+' of '+cur.ps.length+' notes';mk.style.left='50%';}
+else if(cur){stat.textContent='Chord '+cdisp(cur.r.cn||'')+'   heard '+c+' of '+cur.ps.length+' notes';mk.style.left='50%';}
 P.evs.forEach(function(e){if(!e.done&&e.t+e.d<fnow-0.02)scoreEv(e);});
 if(now>P.end+P.lat+0.3){finishPerform();return;}
 var ph=RA+(now-P.t0)/P.spb;draw(ph);
@@ -1406,7 +1447,7 @@ if(win!==null){
 if(win==='-'){stt.textContent='Listening… play a note or a chord.';big.textContent='–';mk.style.left='50%';showTok(null);}
 else if(res&&res.id===win){
 if(res.ch){var c2=res.ch;big.textContent=T(c2.tok);
-stt.textContent=(/\+/.test(c2.name)?'Two notes':'Chord '+c2.name)+'  ·  '+c2.ps.map(nm).join(' ')+(c2.missing.length?'  ·  '+c2.missing.map(nm).join(', ')+' is weak':'  ·  all notes sounding')+(c2.octUp?'  ·  hole '+T(c2.octUp)+' may be sounding too (same note an octave up)':'');
+stt.textContent=(/\+/.test(c2.name)?'Two notes':'Chord '+cdisp(c2.name))+'  ·  '+c2.ps.map(nm).join(' ')+(c2.missing.length?'  ·  '+c2.missing.map(nm).join(', ')+' is weak':'  ·  all notes sounding')+(c2.octUp?'  ·  hole '+T(c2.octUp)+' may be sounding too (same note an octave up)':'');
 mk.style.left='50%';showTok(c2.toks);document.getElementById('fpmeter').hidden=true;document.getElementById('fplg').hidden=true;}
 else{var toks=Object.keys(tt).filter(function(k){return tt[k]===res.p-key;});
 big.textContent=toks.length?toks.map(T).join('  or  '):nm(res.p);
@@ -1524,7 +1565,7 @@ function chordFlags(fd,sr,ps,fftN){var bh=sr/fftN,lo=Math.floor(150/bh),hi=Math.
 for(var k=lo;k<hi;k++){if(fd[k]>top)top=fd[k];}var has=noteHeard(fd,sr,fftN,top);
 return ps.map(has);}
 function where(e){return 'bar '+(Math.floor(e.r.t/(ppq*bpb))+1)+', beat '+(Math.floor((e.r.t%(ppq*bpb))/ppq)+1);}
-function nameOf(e){return (e.r.cn||nm(e.r.p))+' ('+T(e.r.tok)+')';}
+function nameOf(e){return (e.r.cn?cdisp(e.r.cn):nm(e.r.p))+' ('+T(e.r.tok)+')';}
 function analyze(P){
 var E=P.evs,n=E.length,A={n:n};
 A.total=Math.round(mean(E.map(function(e){return e.res.score;})));
@@ -1604,7 +1645,7 @@ document.getElementById('nn').addEventListener('change',render);
 document.getElementById('cho').addEventListener('change',render);
 var sel=null,geo=null;
 function edUI(r){var on=!!r;['ed-up','ed-dn','ed-o1','ed-o2','ed-del','ed-l','ed-r','ed-add','ed-from'].forEach(function(id){document.getElementById(id).disabled=!on;});document.getElementById('ed-undo').disabled=!canUndo();
-document.getElementById('ed-info').textContent=r?('Selected: '+(r.cn||nm(r.p))+(r.tok==='?'?' (not playable)':'  \u00b7  tab '+T(r.tok))):'Tap a note in the roll or a tab card to select it.';}
+document.getElementById('ed-info').textContent=r?('Selected: '+(r.cn?cdisp(r.cn):nm(r.p))+(r.tok==='?'?' (not playable)':'  \u00b7  tab '+T(r.tok))):'Tap a note in the roll or a tab card to select it.';}
 function beep(p){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.resume)actx.resume();
 var o=actx.createOscillator(),g=actx.createGain(),n=actx.currentTime;reedOsc(o);o.frequency.value=440*Math.pow(2,(p-69)/12);
 g.gain.setValueAtTime(0.0001,n);g.gain.linearRampToValueAtTime(0.15,n+0.02);g.gain.linearRampToValueAtTime(0.0001,n+0.35);
@@ -1884,6 +1925,17 @@ document.getElementById('low').addEventListener('change',render);
 (function(){var bl=document.getElementById('blay');try{bl.value=localStorage.getItem('harmonica-barlayout')||'vert';}catch(e){}
 bl.addEventListener('change',function(){try{localStorage.setItem('harmonica-barlayout',bl.value);}catch(e){}buildChips();if(curI>=0)setCur(curI);});})();
 document.getElementById('tstyle').addEventListener('change',function(){tstyle=this.value;try{localStorage.setItem('harmonica-tabstyle',tstyle);}catch(e){}if(parts[+trSel.value])render();});
+(function(){var sels=document.querySelectorAll('select.nota'),swl=document.getElementById('swl'),sa=document.getElementById('sasel'),help=document.getElementById('swhelp'),keyb=document.getElementById('swkey');
+function sync(){for(var i=0;i<sels.length;i++)sels[i].value=NOTA.mode;swl.value=NOTA.lab;sa.value=NOTA.sa;swl.disabled=sa.disabled=NOTA.mode==='w';
+var sp=saPc();help.textContent=NOTA.mode==='w'?'Pick Indian sargam to see Sa Re Ga instead of C D E.':'Sa is '+NN[sp]+' now. Capital = shuddha (natural), small = komal (flat), ` on Ma = tivra (sharp). A dot below = mandra (lower) saptak, a dot above = taar (upper), two dots = one more octave.';
+keyb.innerHTML='';if(NOTA.mode==='w')return;var mid=saMid();for(var k=0;k<12;k++){var c=document.createElement('span');nmEl(mid+k,c);var w=document.createElement('small');w.textContent=NN[(sp+k)%12];c.appendChild(w);keyb.appendChild(c);}}
+function apply(){try{localStorage.setItem('harmonica-notation',JSON.stringify(NOTA));}catch(e){}sync();
+if(parts[+trSel.value])render();else buildHarp();var h2=document.getElementById('hp2');if(h2&&h2.children.length)buildHarp(h2);}
+for(var i=0;i<sels.length;i++)sels[i].addEventListener('change',function(){NOTA.mode=this.value;apply();});
+swl.addEventListener('change',function(){NOTA.lab=swl.value;apply();});
+sa.addEventListener('change',function(){NOTA.sa=sa.value;apply();});
+document.getElementById('key').addEventListener('change',function(){if(NOTA.sa==='harp')sync();});
+window.notaSync=sync;sync();})();
 // undo / add / move / play from here
 function snap(part){var am=[],au=audioNotes.map(function(a){var c={s:a.s,n:a.n};am.push([a,c]);return c;});
 function find(a){for(var i=0;i<am.length;i++)if(am[i][0]===a)return am[i][1];return undefined;}
@@ -1986,7 +2038,7 @@ function waitGo(k){var w=wt,r=roll[w.list[k]],prev=k>0?roll[w.list[k-1]]:null;
 w.k=k;w.goodT=0;w.badT=0;w.badP=null;w.chT=0;w.hinted=false;
 w.needRel=!!prev&&(prev.ps||[prev.p]).join()===(r.ps||[r.p]).join();w.quietT=0;
 setCur(w.list[k]);draw(r.t/ppq);
-document.getElementById('pstat').textContent='Note '+(k+1)+' of '+w.list.length+': play '+T(r.tok)+'  ('+(r.cn||nm(r.p))+')';
+document.getElementById('pstat').textContent='Note '+(k+1)+' of '+w.list.length+': play '+T(r.tok)+'  ('+(r.cn?cdisp(r.cn):nm(r.p))+')';
 document.getElementById('pdetail').textContent=w.needRel?'Same note again: stop the air for a moment, then play it again.':'';
 if(document.getElementById('whear').checked){beepR(r);
 // the guide is heard by the mic after the device's output + input delay, and lingers in the analysis window
@@ -2420,7 +2472,7 @@ kk.addEventListener('change',function(){try{localStorage.setItem('harmonica-keep
 </script>
 <script>
 (function(){
-var APP_VERSION='3.8';
+var APP_VERSION='3.9';
 document.getElementById('vnum').textContent=APP_VERSION;
 var upd=document.getElementById('upd'),vst=document.getElementById('vst');
 function hardUpdate(){

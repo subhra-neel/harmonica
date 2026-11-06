@@ -42,3 +42,9 @@ Change the version number in three places: `APP_VERSION` in index.html, `VERSION
 ### New in 3.8
 - **Song mp3: the whole tune or just the singing.** In Songs, under the recording button, pick *From a full song, take: The whole tune / Just the singing*. Just the singing keeps the parts that move like a voice (vibrato, slides, notes between the keys) and leaves out keyboards, guitars and other steady instruments. If little singing is found (instruments louder than the voice), the app says so.
 - Tip: combine *Just the singing* with *Long silences: Shorten* for a compact practice version.
+
+### New in 3.9
+- Indian sargam note names (Settings → My harmonica → Note names, or the quick "Names" switch under the tabs): Western, Sargam, or Both.
+- Capital = shuddha (Sa Re Ga Ma Pa Dha Ni), small = komal (re ga dha ni), ` on Ma = tivra. Dot below = mandra saptak, dot above = taar, two dots = one octave further.
+- Full (Sa Re Ga) or short (S R G) labels. Sa follows the harmonica key by default (C harp: Sa = C), or can be set to any note.
+- Works across tab cards, the harmonica chart, piano roll, tab sheet, chord names, Play & wait hints, coaching feedback and Free play.
