@@ -48,3 +48,17 @@ Change the version number in three places: `APP_VERSION` in index.html, `VERSION
 - Capital = shuddha (Sa Re Ga Ma Pa Dha Ni), small = komal (re ga dha ni), ` on Ma = tivra. Dot below = mandra saptak, dot above = taar, two dots = one octave further.
 - Full (Sa Re Ga) or short (S R G) labels. Sa follows the harmonica key by default (C harp: Sa = C), or can be set to any note.
 - Works across tab cards, the harmonica chart, piano roll, tab sheet, chord names, Play & wait hints, coaching feedback and Free play.
+
+### New in 3.10 / 3.11
+- Type chords in sargam in **Build your own chord bars** and **Paste a chord sheet**: `Sa | Re | Dham Ma | Pa7`. Sa = your harmonica key (or the Sa set in Settings).
+- Capital = shuddha, small = komal (`re ga dha ni`), `Ma`` = tivra (`M`a`, `Ma'` and `Ma#` also work). Suffix straight after the name (`Gam`, `Pa7`, `Remaj7`); `Dha m` with a space also works in chord bars. Slash bass: `Sa/Ga`.
+- Rule: **one letter = Western chord** (`C`, `G`, `g`, `am` all work), **full name = sargam** (`Sa`, `Ga`, `ga`, `Dha`, `dha`, `Ma`). Short sargam letters (S, R, M, d, m) are not used. You can mix both.
+- The chord buttons above the box show and insert chords in your chosen note names.
+
+### New in 3.12
+- **10-hole chromatic** added as a harmonica type (Settings → Type, the player, and the welcome screen). Solo tuning, the same layout as the first 10 holes of a 12-hole: C4 to F6, F♯6 with the slide button.
+- Notes above the 10-hole range move down an octave automatically. All chromatic lessons fit on 10 holes. Drum rhythm tabs move the hole-11 tom to hole 10.
+- The app now remembers which harmonica you chose.
+
+### New in 3.13
+- Each harmonica type remembers its own key. Example: Special 20 in B, Easttop T10-40 in C and EAP-12 in C. Switch type and the key follows. Chromatics start in C.
