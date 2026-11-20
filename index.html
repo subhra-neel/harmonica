@@ -144,6 +144,23 @@ background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--bd) 70%,trans
 .sl.tv[data-o="1"]::after,.sl.tv[data-o="2"]::after{top:-1.25em}
 .chip i .sw,.hc .sw{display:inline-block;padding:.7em 0 .55em;line-height:1}
 .swkey{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.swkey>span{display:inline-flex;flex-direction:column;align-items:center;min-width:3.4em;border:1px solid var(--bd);border-radius:8px;padding:2px 6px 4px;font-size:1rem}.swkey>span .sw{padding:.6em 0 .2em;line-height:1}.swkey>span small{font-size:.7rem;color:var(--mut)}
+.btrack{position:relative;height:34px;margin:16px 4px 26px;border-radius:10px;background:linear-gradient(90deg,var(--bd),color-mix(in srgb,var(--ac2) 22%,var(--bd)) 78%,color-mix(in srgb,var(--bad) 25%,var(--bd)))}
+.btzone{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--ok) 40%,transparent);border-radius:6px;transition:background .15s}
+#bendcard.hit .btzone{background:var(--ok)}
+.btmk{position:absolute;top:-5px;width:12px;height:44px;margin-left:-6px;background:var(--ac);border-radius:6px;left:8%;transition:left .08s linear;z-index:2}
+.btl,.btr{position:absolute;top:100%;margin-top:4px;font-size:.75rem;color:var(--mut);transform:translateX(-50%)}.btl{left:8%}.btr{left:78%}
+.hold{text-align:center;font-size:.95rem;margin-top:10px;color:var(--mut)}.hold b{color:var(--ok);font-size:1.25rem}
+.rgaa{margin-top:12px;font-size:1.05rem;line-height:1}.rgaa>div{display:flex;flex-wrap:wrap;align-items:center;gap:2px 10px;margin-bottom:4px}
+.rgaa b{min-width:4.2em;color:var(--mut);font-size:.8rem;font-weight:600}.rgaa .sw{padding:.7em 0 .55em}
+.rgnotes{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.rgn{display:flex;flex-direction:column;align-items:center;min-width:3.5em;border:1px solid var(--bd);border-radius:10px;padding:2px 6px 5px;background:var(--bg)}
+.rgn .sw{padding:.7em 0 .7em;line-height:1;font-weight:650}.rgn b{font-size:1rem}.rgn small{font-size:.7rem;color:var(--mut)}
+.rgn.near{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 10%,var(--bg))}.rgn.bad{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 10%,var(--bg))}
+.rgbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button.tpbtn.on{background:var(--ok);border-color:var(--ok);color:#fff}
+#tppill{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:45;display:flex;gap:8px;align-items:center;background:var(--card);color:var(--fg);border:1px solid var(--bd);border-radius:999px;padding:4px 4px 4px 12px;box-shadow:0 4px 14px rgba(0,0,0,.15);font-size:.85rem}
+#tppill button{min-height:36px;padding:6px 12px;border-radius:999px;font-size:.85rem}
+@media (max-width:640px){#tppill{bottom:calc(var(--navh) + 14px + env(safe-area-inset-bottom,0px))}}
 .chip b{font-size:1.3rem;font-weight:700}.chip i{font-style:normal;font-size:.72rem;color:var(--mut)}
 .chip.bad{border-color:var(--bad)}
 .chip.on{background:var(--ac);color:var(--acfg);border-color:var(--fg);transform:scale(1.06)}.chip.on i{color:var(--acfg)}
@@ -306,6 +323,24 @@ body.focusing{overflow:hidden}
 <div id="ltabs" role="tablist"></div>
 <div class="info" id="lsum"></div>
 <div id="plist" style="margin-top:10px"></div>
+</div>
+<div class="card" id="raagcard">
+<h2>Raag &amp; alankar practice</h2>
+<p class="lead">Practise a raag's swaras in classic alankar patterns on your own harmonica. It opens in the player, so Play &amp; wait, loops, the speed trainer and scoring all work.</p>
+<div class="row">
+<div><label for="rgsel">Raag</label><select id="rgsel"></select></div>
+<div><label for="rgpat">Pattern</label><select id="rgpat"></select></div>
+</div>
+<div class="row">
+<div><label for="rgrng">Range</label><select id="rgrng"></select></div>
+<div><label for="rgbpm">Speed (BPM)</label><input type="number" id="rgbpm" min="30" max="200" value="70"></div>
+</div>
+<label for="rgoct">Sa at</label><select id="rgoct"><option value="auto">Best fit</option><option value="-12">Low</option><option value="0">Middle</option><option value="12">High</option></select>
+<div class="rgaa" id="rgaa"></div>
+<div class="legend" style="margin-top:10px">On your harmonica (amber = bend, red = not available):</div>
+<div class="rgnotes" id="rgnotes"></div>
+<div class="info" id="rginfo"></div>
+<div class="rgbtns"><button type="button" class="big" id="rggo">Practise in the player →</button><button type="button" class="ghost tpbtn" id="rgtp">🪕 Tanpura</button></div>
 </div>
 <div class="card">
 <h2>Your progress</h2>
@@ -478,8 +513,41 @@ body.focusing{overflow:hidden}
 <div class="pstat" id="fpstat" style="text-align:center">Press Start listening, then play a note or a chord.</div>
 <div id="fpmeter"><div id="fpmk"></div></div>
 <div class="legend" id="fplg" style="display:flex;justify-content:space-between"><span>flat</span><span>in tune</span><span>sharp</span></div>
+<div class="hold" id="fphold" hidden></div>
 <div id="hp2" class="hgrid" style="margin-top:12px"></div>
 </div>
+</div>
+<div class="card" id="riyaz">
+<h2>Riyaz with a tanpura</h2>
+<p class="lead">A tanpura drone tuned to your harmonica's Sa. Play long notes against it: when a swara is in tune the wobble (beating) disappears. Start listening above as well and the long-note timer tracks how long you hold a note steady.</p>
+<div class="row">
+<div><label for="tpfirst">First string</label><select id="tpfirst"><option value="P">Pa (most raags)</option><option value="M">Ma (raags without Pa, e.g. Malkauns)</option><option value="N">Ni (e.g. Marwa)</option><option value="S">Sa only</option></select></div>
+<div><label for="tpoct">Pitch</label><select id="tpoct"><option value="-12">One octave below your Sa (warm)</option><option value="-24">Two octaves below (deep)</option><option value="0">Same octave as your Sa</option></select></div>
+</div>
+<div class="row">
+<div><label for="tpspd">Pluck speed</label><select id="tpspd"><option value="1.2">Slow</option><option value="0.9" selected>Medium</option><option value="0.65">Fast</option></select></div>
+<div><label for="tpvol">Volume</label><input type="range" id="tpvol" min="0" max="100" value="60"></div>
+</div>
+<div class="rgbtns"><button type="button" class="big tpbtn" id="tpgo">🪕 Start tanpura</button></div>
+<div class="info" id="tpinfo"></div>
+</div>
+<div class="card" id="bendcard">
+<h2>Bend trainer</h2>
+<p class="lead">Pick a bend, hear the target, then bend into the green zone and hold it there.</p>
+<div id="btctl">
+<div class="row">
+<div><label for="btsel">Bend</label><select id="btsel"></select></div>
+<div><label>Reference</label><button type="button" id="btref" class="ghost" style="width:100%">🔊 Hear the note, then the bend</button></div>
+</div>
+<div class="rgbtns"><button type="button" class="big" id="btgo">🎯 Start bend practice</button></div>
+<div id="btbox" hidden>
+<div class="bignote" id="btnote">–</div>
+<div class="btrack" aria-hidden="true"><div class="btzone" id="btzone"></div><div class="btmk" id="btmk"></div><span class="btl">unbent</span><span class="btr">target</span></div>
+<div class="pstat" id="btstat" style="text-align:center"></div>
+<div class="stats" id="btscore" style="margin-top:10px"></div>
+</div>
+</div>
+<div class="info" id="btinfo"></div>
 </div>
 </section>
 
@@ -596,6 +664,7 @@ body.focusing{overflow:hidden}
 </div>
 
 <div id="toast" role="status" aria-live="polite" hidden></div>
+<div id="tppill" hidden><span id="tppt">🪕 Tanpura</span><button type="button" id="tpps">Stop</button></div>
 <div id="printarea"></div>
 <div id="upd" hidden><span id="updt" style="flex:1">A new version is ready.</span><button id="updb" type="button">Update</button></div>
 
@@ -1411,7 +1480,7 @@ return;}
 requestAnimationFrame(loop);})();
 }).catch(function(err){st.textContent='Could not use the microphone: '+err.message;});}
 document.getElementById('cal').addEventListener('click',calibrate);
-function stopFree(){fpOn=false;if(fp){try{fp.stream.getTracks().forEach(function(t){t.stop();});fp.src.disconnect();}catch(e){}}fp=null;document.getElementById('fp').textContent='\ud83c\udfa7 Start listening';document.getElementById('fpnote').textContent='\u2013';showTok(null);}
+function stopFree(){fpOn=false;if(fp){try{fp.stream.getTracks().forEach(function(t){t.stop();});fp.src.disconnect();}catch(e){}}fp=null;holdEnd();document.getElementById('fphold').hidden=true;document.getElementById('fp').textContent='\ud83c\udfa7 Start listening';document.getElementById('fpnote').textContent='\u2013';showTok(null);}
 // Multi-note detection for Free play: find played notes in the spectrum, drop overtones, match a harmonica chord shape.
 // is pitch p sounding in this spectrum? Shared by Free play and Play & wait chord detection.
 function noteHeard(fd,sr,N,top){var bh=sr/N;
@@ -1447,6 +1516,7 @@ var up=null;shapes().forEach(function(s){var ps=s.notes.map(function(n){return n
 return {tok:best.s.tok,toks:best.s.toks,ps:best.ps,name:chordName(best.ps),missing:best.missing,octUp:up};}
 function startFree(){
 if(fpOn){stopFree();document.getElementById('fpstat').textContent='Stopped.';return;}
+if(bndOn)bendStop();
 if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){toast('Microphone access is not available here. Open the app over https.');return;}
 if(perfOn)stopPerform(true);
 actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.resume)actx.resume();
@@ -1480,6 +1550,7 @@ big.textContent=toks.length?toks.map(T).join('  or  '):nm(res.p);
 stt.textContent=nm(res.p)+'  ·  '+(Math.abs(res.c)<=10?'in tune':(res.c>0?res.c+' cents sharp':(-res.c)+' cents flat'))+(toks.length?'':'  ·  not on this harmonica');
 mk.style.left=(50+Math.max(-50,Math.min(50,res.c)))+'%';showTok(toks);document.getElementById('fpmeter').hidden=false;document.getElementById('fplg').hidden=false;}}
 fp.shown=win;}
+holdTick(res&&!res.ch?res:null);
 requestAnimationFrame(loop);})();
 }).catch(function(err){toast('Could not use the microphone: '+err.message);});}
 document.getElementById('fp').addEventListener('click',startFree);
@@ -1897,7 +1968,7 @@ document.querySelectorAll('#nav button').forEach(function(b){if(b.dataset.v===v)
 curView=v;
 if(v==='songs')renderPal();
 if(v==='free')buildHarp(document.getElementById('hp2'));
-if(v!=='free'&&fpOn)stopFree();
+if(v!=='free'&&fpOn)stopFree();if(v!=='free'&&bndOn)bendStop();if(v==='free')bendList();tpUI();
 if(v!=='player'){if(playing)stopPlay();if(perfOn)stopPerform(true);if(replaying)stopReplay();if(waitOn)stopWait();}
 try{window.scrollTo(0,0);}catch(e){}}
 document.querySelectorAll('#nav button').forEach(function(b){b.addEventListener('click',function(){showView(b.dataset.v);});});
@@ -2504,11 +2575,202 @@ Object.keys(names).map(Number).sort(function(a,b){return a-b;}).forEach(function
 var x=mel.filter(function(n){return n.t>=b*barT&&n.t<(b+1)*barT;})[0];if(x){x.csym=names[b];last=names[b];}});}
 (function(){var kk=document.getElementById('keepk');try{var v=localStorage.getItem('harmonica-keepkey');if(v!=null)kk.checked=v==='1';}catch(e){}
 kk.addEventListener('change',function(){try{localStorage.setItem('harmonica-keepkey',kk.checked?'1':'0');}catch(e){}shSel.value='auto';render();});})();
+// ===================== Riyaz tools: tanpura drone, long-note timer, bend trainer, raag & alankar practice =====================
+function lsGet(k,d){try{var v=JSON.parse(localStorage.getItem(k)||'null');return v==null?d:v;}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function audioOn(){actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.resume)actx.resume();return actx;}
+// a held reference note with the reed sound
+function refTone(p,dur){try{var a=audioOn(),o=a.createOscillator(),g=a.createGain(),n=a.currentTime;reedOsc(o);o.frequency.value=440*Math.pow(2,(p-69)/12);
+g.gain.setValueAtTime(0.0001,n);g.gain.linearRampToValueAtTime(0.16,n+0.04);g.gain.setValueAtTime(0.16,n+dur-0.15);g.gain.linearRampToValueAtTime(0.0001,n+dur);
+o.connect(g);g.connect(a.destination);o.start(n);o.stop(n+dur+0.05);}catch(e){}}
+// sargam name from a position relative to Sa (0 = madhya Sa, 12 = taar Sa, -5 = mandra Pa)
+function swRel(p){var i=((p%12)+12)%12,o=Math.max(-2,Math.min(2,Math.floor(p/12))),t=(NOTA.lab==='short'?SW_S:SW_F)[i],c=t.charAt(0);if(i===6)c+='̀';c+=['̤','̣','','̇','̈'][o+2];return c+t.slice(1);}
+function swNode(p,full){var i=((p%12)+12)%12,o=Math.max(-2,Math.min(2,Math.floor(p/12))),t=(full||NOTA.lab!=='short'?SW_F:SW_S)[i];
+var w=document.createElement('span'),l=document.createElement('span');w.className='sw';l.className='sl'+(i===6?' tv':'');if(o)l.setAttribute('data-o',String(o));l.textContent=t.charAt(0);w.appendChild(l);if(t.length>1)w.appendChild(document.createTextNode(t.slice(1)));return w;}
+// Sa of the current harmonica, as a note on the C-layout map (72 = hole 4 blow on a diatonic, hole 5 blow on a chromatic)
+function saHarp(){return saMid()-KEYS[keySel.value];}
+
+// ---------- tanpura ----------
+var TP={on:false,iv:null,next:0,i:0,out:null,wave:null};
+function tpWave(a){if(TP.wave)return TP.wave;var N=28,re=new Float32Array(N),im=new Float32Array(N);
+// rich string tone; the jawari bridge lifts the middle harmonics
+for(var h=1;h<N;h++){re[h]=0;im[h]=Math.pow(h,-0.85)*(h>=5&&h<=14?1.7:1)*(h%2?1:0.8);}return TP.wave=a.createPeriodicWave(re,im);}
+function tpStrings(){var sa=saMid()+(+document.getElementById('tpoct').value||0),f=document.getElementById('tpfirst').value;
+return [f==='P'?sa-5:f==='M'?sa-7:f==='N'?sa-1:sa,sa,sa,sa-12];}
+function tpPluck(p,t,long){var a=actx,f=440*Math.pow(2,(p-69)/12),g=a.createGain(),lp=a.createBiquadFilter();lp.type='lowpass';lp.Q.value=1.2;
+lp.frequency.setValueAtTime(Math.min(9000,f*22),t);lp.frequency.exponentialRampToValueAtTime(Math.max(500,f*5),t+long*0.7);
+g.gain.setValueAtTime(0.0001,t);g.gain.linearRampToValueAtTime(0.22,t+0.012);g.gain.exponentialRampToValueAtTime(0.06,t+long*0.35);g.gain.exponentialRampToValueAtTime(0.0001,t+long);
+[-2.5,2.5].forEach(function(dt){var o=a.createOscillator();o.setPeriodicWave(tpWave(a));o.frequency.value=f;o.detune.value=dt;o.connect(lp);o.start(t);o.stop(t+long+0.05);});
+lp.connect(g);g.connect(TP.out);}
+function tpSched(){if(!TP.on)return;var gap=+document.getElementById('tpspd').value||0.9,s=tpStrings();
+while(TP.next<actx.currentTime+0.4){var k=TP.i%4;tpPluck(s[k],TP.next,gap*5.5);TP.next+=gap*(k===3?1.7:1)*(0.97+Math.random()*0.06);TP.i++;}}
+function tpVol(){if(TP.out){var v=(+document.getElementById('tpvol').value||0)/100;TP.out.gain.setTargetAtTime(0.6*v*v,actx.currentTime,0.08);}}
+function tpStart(){var a=audioOn();TP.out=a.createGain();TP.out.gain.value=0;TP.out.connect(a.destination);TP.on=true;TP.i=0;TP.next=a.currentTime+0.08;tpVol();tpSched();TP.iv=setInterval(tpSched,120);tpUI();}
+function tpStop(){TP.on=false;clearInterval(TP.iv);TP.iv=null;if(TP.out){var o=TP.out;try{o.gain.setTargetAtTime(0,actx.currentTime,0.12);}catch(e){}setTimeout(function(){try{o.disconnect();}catch(e){}},900);}TP.out=null;tpUI();}
+function tpToggle(){if(TP.on)tpStop();else tpStart();}
+function tpUI(){if(!TP)return;var s=tpStrings(),names=['','','',''],f=document.getElementById('tpfirst').value;
+document.querySelectorAll('.tpbtn').forEach(function(b){b.classList.toggle('on',TP.on);b.textContent=TP.on?'■ Stop tanpura':'🪕 '+(b.id==='tpgo'?'Start tanpura':'Tanpura');});
+var info='Tuned to Sa = '+nmW(s[1])+' (your '+instLabel(curInst()).toLowerCase()+' in '+keySel.value+'). Strings: '+(f==='S'?'Sa':f==='P'?'Pa':f==='M'?'Ma':'Ni')+', Sa, Sa, low Sa.';
+document.getElementById('tpinfo').textContent=info+(TP.on?' Use earphones while the microphone is listening, so it hears only your harmonica.':'');
+var pill=document.getElementById('tppill');pill.hidden=!(TP.on&&curView!=='free');document.getElementById('tppt').textContent='🪕 Tanpura · Sa = '+NN[saPc()];}
+['tpvol'].forEach(function(id){document.getElementById(id).addEventListener('input',function(){tpVol();lsSet('harmonica-tanpura',tpCfg());});});
+['tpfirst','tpoct','tpspd'].forEach(function(id){document.getElementById(id).addEventListener('change',function(){tpUI();lsSet('harmonica-tanpura',tpCfg());});});
+function tpCfg(){return {f:document.getElementById('tpfirst').value,o:document.getElementById('tpoct').value,s:document.getElementById('tpspd').value,v:document.getElementById('tpvol').value};}
+(function(){var c=lsGet('harmonica-tanpura',null);if(c){['tpfirst:f','tpoct:o','tpspd:s','tpvol:v'].forEach(function(x){var q=x.split(':'),e=document.getElementById(q[0]);if(c[q[1]]!=null){e.value=c[q[1]];if(e.value!==String(c[q[1]])&&e.tagName==='SELECT')e.selectedIndex=0;}});}})();
+document.getElementById('tpgo').addEventListener('click',tpToggle);
+document.getElementById('tpps').addEventListener('click',tpStop);
+
+// ---------- long-note timer (runs inside Free play) ----------
+var HOLD={cur:null,best:0,ever:lsGet('harmonica-hold-best',0)};
+function holdTick(res){var now=performance.now(),el=document.getElementById('fphold');el.hidden=false;
+if(res&&Math.abs(res.c)<=20){if(HOLD.cur&&HOLD.cur.p===res.p)HOLD.cur.last=now;else HOLD.cur={p:res.p,start:now,last:now};}
+else if(HOLD.cur&&now-HOLD.cur.last>300){holdEnd();}
+var h=HOLD.cur?(HOLD.cur.last-HOLD.cur.start)/1000:0;
+if(HOLD.cur&&h>=0.6){el.innerHTML='';var b=document.createElement('b');b.textContent=h.toFixed(1)+' s';el.appendChild(document.createTextNode('Holding '+nm(HOLD.cur.p)+' in tune: '));el.appendChild(b);
+if(HOLD.ever)el.appendChild(document.createTextNode('  ·  best '+HOLD.ever.toFixed(1)+' s'));}
+else el.textContent=HOLD.best?'Long notes today: best '+HOLD.best.toFixed(1)+' s'+(HOLD.ever>HOLD.best?' (your record is '+HOLD.ever.toFixed(1)+' s)':' — a new record!'):'Long-note practice: hold any note steady and in tune (within 20 cents) and the timer runs.';}
+function holdEnd(){if(!HOLD.cur)return;var h=(HOLD.cur.last-HOLD.cur.start)/1000;HOLD.cur=null;if(h>HOLD.best)HOLD.best=h;if(h>HOLD.ever){HOLD.ever=h;lsSet('harmonica-hold-best',h);}}
+
+// ---------- bend trainer (diatonic) ----------
+var bndOn=false,bnd=null,BND={hits:0,best:lsGet('harmonica-bend-best',{})};
+function bendItems(){var L=[];Object.keys(DBEND).forEach(function(h){DBEND[h].forEach(function(n,j){L.push({tok:'-'+h+Array(j+2).join("'"),n:n,from:DRAW[h-1],h:+h,st:j+1,draw:true});});});
+Object.keys(BBEND).forEach(function(h){BBEND[h].forEach(function(n,j){L.push({tok:h+Array(j+2).join("'"),n:n,from:BLOW[h-1],h:+h,st:j+1,draw:false});});});
+return L.sort(function(a,b){return a.h-b.h||a.st-b.st;});}
+function bendCur(){var v=document.getElementById('btsel').value;return bendItems().filter(function(x){return x.tok===v;})[0]||null;}
+function bendList(){if(!BND)return;var chr=MAP===CHR,sel=document.getElementById('btsel'),prev=sel.value||lsGet('harmonica-bend-last',"-4'"),key=KEYS[keySel.value];
+document.getElementById('btctl').hidden=chr;if(chr&&bndOn)bendStop();
+if(chr){document.getElementById('btinfo').textContent='Bends are a diatonic skill. Your chromatic plays these in-between notes with the slide button, so there is nothing to bend. Pick your diatonic (Settings → Type) to practise bends.';return;}
+sel.innerHTML='';bendItems().forEach(function(x){var o=document.createElement('option');o.value=x.tok;o.textContent=T(x.tok)+'  ·  '+nm(x.n+key)+'  ('+['half','whole','1½'][x.st-1]+' step down from '+nm(x.from+key)+')';sel.appendChild(o);});
+sel.value=prev;if(!sel.value)sel.value="-4'";bendInfo();}
+function bendInfo(){var x=bendCur();if(!x)return;var b=BND.best[x.tok];
+document.getElementById('btinfo').textContent=(x.draw?'Draw bend tip: whisper "eee" into the hole, then slide to "ooo" while you keep drawing gently. The tongue drops and pulls back; do not draw harder. ':'Blow bend tip: aim the air at your lower teeth as if saying a soft "tsss", and narrow the back of your mouth. ')+
+(x.st>1?'Deep bends pass through the shallower ones: find '+T(x.tok.replace(/'+$/,"'"))+' first. ':'')+(b?'Your best hold on this bend: '+b.toFixed(1)+' s.':'');}
+function bendStop(){bndOn=false;if(bnd){try{bnd.stream.getTracks().forEach(function(t){t.stop();});bnd.src.disconnect();}catch(e){}}bnd=null;
+document.getElementById('btgo').textContent='🎯 Start bend practice';document.getElementById('bendcard').classList.remove('hit');}
+function bendStart(){if(bndOn){bendStop();return;}var x=bendCur();if(!x)return;
+if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){toast('Microphone access is not available here. Open the app over https.');return;}
+if(fpOn)stopFree();if(perfOn)stopPerform(true);audioOn();
+micStream().then(function(stream){var an=actx.createAnalyser();an.fftSize=4096;var src=actx.createMediaStreamSource(stream);src.connect(an);
+bnd={stream:stream,src:src,an:an,td:new Float32Array(an.fftSize),sr:actx.sampleRate,hist:[],inz:0,counted:false,last:0};bndOn=true;BND.hits=0;
+document.getElementById('btbox').hidden=false;document.getElementById('btgo').textContent='■ Stop';bendDraw(null);
+(function loop(){if(!bndOn)return;var x=bendCur();if(!x){requestAnimationFrame(loop);return;}
+bnd.an.getFloatTimeDomainData(bnd.td);var sub=bnd.td.subarray(bnd.td.length-2048),r=0;for(var i=0;i<2048;i++)r+=sub[i]*sub[i];r=Math.sqrt(r/2048);
+var m=null;if(r>0.008){var f=yin(sub,bnd.sr);if(f)m=69+12*Math.log2(f/440)-KEYS[keySel.value];}
+bnd.hist.push(m);if(bnd.hist.length>3)bnd.hist.shift();var ok=bnd.hist.filter(function(v){return v!=null;});
+var cur=ok.length>=2?median(ok):null;if(cur!=null&&(cur<x.n-1.2||cur>x.from+0.7))cur={off:cur};
+bendDraw(cur);requestAnimationFrame(loop);})();
+}).catch(function(err){toast('Could not use the microphone: '+err.message);});}
+function bendDraw(m){var x=bendCur();if(!x)return;var key=KEYS[keySel.value],span=x.from-x.n,mk=document.getElementById('btmk'),z=document.getElementById('btzone'),st=document.getElementById('btstat'),card=document.getElementById('bendcard'),now=performance.now();
+var X0=8,X1=78;z.style.left=(X1-15/(span*100)*(X1-X0))+'%';z.style.width=(30/(span*100)*(X1-X0))+'%';
+document.getElementById('btnote').textContent=T(x.tok);
+if(m==null||typeof m==='object'){bnd&&(bnd.inz=0,bnd.counted=false);card.classList.remove('hit');mk.style.opacity=m?'.35':'.35';
+st.textContent=m&&typeof m==='object'?'That is '+nm(Math.round(m.off)+key)+'. Play hole '+x.h+' '+(x.draw?'draw':'blow')+' ('+nm(x.from+key)+') and bend down from there.':'Play hole '+x.h+' '+(x.draw?'draw':'blow')+', then bend it down to '+nm(x.n+key)+'.';bendScore();return;}
+mk.style.opacity='1';var prog=(x.from-m)/span;mk.style.left=Math.max(2,Math.min(98,X0+prog*(X1-X0)))+'%';
+var c=Math.round((m-x.n)*100),inz=Math.abs(c)<=15;
+if(inz){if(!bnd.inz)bnd.inz=now;var held=(now-bnd.inz)/1000;st.textContent='In the zone, hold it: '+held.toFixed(1)+' s';
+if(held>=0.6&&!bnd.counted){bnd.counted=true;BND.hits++;}if(held>=0.6)card.classList.add('hit');
+var b=BND.best[x.tok]||0;if(held>b){BND.best[x.tok]=held;bnd.dirty=true;}}
+else{if(bnd.inz&&bnd.dirty){lsSet('harmonica-bend-best',BND.best);bnd.dirty=false;bendInfo();}bnd.inz=0;bnd.counted=false;card.classList.remove('hit');
+st.textContent=prog<0.12?'Not bending yet. Keep the note and drop your tongue toward "ooo".':c>0?'Bend a little deeper: '+c+' cents to go.':'Too far: '+(-c)+' cents below. Ease off a little.';}
+bendScore();}
+function bendScore(){var x=bendCur(),el=document.getElementById('btscore');el.innerHTML='';
+[[BND.hits,'clean bends this session'],[(x&&BND.best[x.tok]?BND.best[x.tok].toFixed(1):'0.0')+' s','longest hold on '+(x?T(x.tok):'')]].forEach(function(t){var d=document.createElement('div');d.className='stat';var b=document.createElement('b');b.textContent=t[0];var s=document.createElement('span');s.textContent=t[1];d.appendChild(b);d.appendChild(s);el.appendChild(d);});}
+document.getElementById('btsel').addEventListener('change',function(){lsSet('harmonica-bend-last',this.value);bendInfo();if(bndOn){BND.hits=0;bendDraw(null);}});
+document.getElementById('btgo').addEventListener('click',bendStart);
+document.getElementById('btref').addEventListener('click',function(){var x=bendCur();if(x){refTone(x.from+KEYS[keySel.value],0.9);setTimeout(function(){refTone(x.n+KEYS[keySel.value],1.3);},950);}});
+
+// ---------- raag & alankar practice ----------
+var SWC={S:0,r:1,R:2,g:3,G:4,M:5,'M+':6,P:7,d:8,D:9,n:10,N:11};
+function rgParse(s){return s.split(' ').map(function(t){var o=0;if(/\.$/.test(t)){o=-12;t=t.slice(0,-1);}else if(/\^$/.test(t)){o=12;t=t.slice(0,-1);}return SWC[t]+o;});}
+// id, name, thaat, time, Carnatic name, aaroh, avroh
+var RAAGS=[['bilawal','Bilawal','Bilawal','morning','Shankarabharanam','S R G M P D N S^','S^ N D P M G R S'],
+['yaman','Yaman','Kalyan','evening','Kalyani','N. R G M+ D N S^','S^ N D P M+ G R S'],
+['bhupali','Bhupali','Kalyan','evening','Mohanam','S R G P D S^','S^ D P G R S'],
+['hamsadhwani','Hamsadhwani','Bilawal','evening','Hamsadhwani','S R G P N S^','S^ N P G R S'],
+['durga','Durga','Bilawal','night','Shuddha Saveri','S R M P D S^','S^ D P M R S'],
+['khamaj','Khamaj','Khamaj','night','close to Harikambhoji','S G M P D N S^','S^ n D P M G R S'],
+['desh','Desh','Khamaj','night, monsoon','','S R M P N S^','S^ n D P M G R S'],
+['kafi','Kafi','Kafi','night','Kharaharapriya','S R g M P D n S^','S^ n D P M g R S'],
+['bhimpalasi','Bhimpalasi','Kafi','afternoon','close to Abheri','n. S g M P n S^','S^ n D P M g R S'],
+['bhairav','Bhairav','Bhairav','early morning','Mayamalavagowla','S r G M P d N S^','S^ N d P M G r S'],
+['bhairavi','Bhairavi','Bhairavi','morning','Hanumatodi','S r g M P d n S^','S^ n d P M g r S'],
+['asavari','Asavari','Asavari','late morning','Natabhairavi','S R M P d S^','S^ n d P M g R S'],
+['todi','Todi','Todi','late morning','Shubhapantuvarali','S r g M+ P d N S^','S^ N d P M+ g r S'],
+['malkauns','Malkauns','Bhairavi','late night','Hindolam','S g M d n S^','S^ n d M g S']];
+var RGP=[['aa','Aaroh–avroh: up and down',4],['p2','Pairs: S R, R G, G M …',2],['p3','Groups of 3: S R G, R G M …',3],['p4','Groups of 4: S R G M, R G M P …',4],['th','Leaps of a third: S G, R M …',2],['nb','Turns: S R S, R G R …',3]];
+var RGR={m:[0,'Madhya: Sa to taar Sa'],mp:[-5,'Mandra Pa to taar Sa'],two:[-12,'Two octaves: mandra Sa to taar Sa']};
+(function(){var s=document.getElementById('rgsel'),p=document.getElementById('rgpat'),g=document.getElementById('rgrng');
+RAAGS.forEach(function(r){var o=document.createElement('option');o.value=r[0];o.textContent=r[1]+(r[4]&&!/^close/.test(r[4])?' ('+r[4]+')':'');s.appendChild(o);});
+RGP.forEach(function(r){var o=document.createElement('option');o.value=r[0];o.textContent=r[1];p.appendChild(o);});
+Object.keys(RGR).forEach(function(k){var o=document.createElement('option');o.value=k;o.textContent=RGR[k][1];g.appendChild(o);});
+var oc=document.getElementById('rgoct'),c=lsGet('harmonica-raag',null);if(c){s.value=c.r||'bilawal';p.value=c.p||'aa';g.value=c.g||'m';oc.value=c.o||'auto';document.getElementById('rgbpm').value=c.b||70;}if(!oc.value)oc.value='auto';if(!s.value)s.value='bilawal';if(!p.value)p.value='aa';if(!g.value)g.value='m';
+[s,p,g,oc,document.getElementById('rgbpm')].forEach(function(e){e.addEventListener('change',function(){lsSet('harmonica-raag',{r:s.value,p:p.value,g:g.value,o:oc.value,b:+document.getElementById('rgbpm').value||70});raagUI();});});})();
+function rgCur(){var id=document.getElementById('rgsel').value,r=RAAGS.filter(function(x){return x[0]===id;})[0]||RAAGS[0];
+var a=rgParse(r[5]),v=rgParse(r[6]),as={},vs={},un={};a.forEach(function(x){as[(x%12+12)%12]=1;un[(x%12+12)%12]=1;});v.forEach(function(x){vs[(x%12+12)%12]=1;un[(x%12+12)%12]=1;});
+return {r:r,a:a,v:v,as:as,vs:vs,un:un};}
+function rgIn(set,p){return !!set[((p%12)+12)%12];}
+function rgRange(set,lo,hi){var L=[];for(var p=lo;p<=hi;p++)if(rgIn(set,p))L.push(p);return L;}
+// the practice line, as positions relative to Sa, split into segments (each segment fills whole bars)
+function rgSeq(R,pat,lo){var segs=[];
+if(pat==='aa'){var up=R.a.map(function(x){return x-12;}).filter(function(x){return x>=lo&&x<R.a[0];});
+if(lo<R.a[0]&&(!up.length||up[0]!==lo)&&rgIn(R.un,lo))up.unshift(lo);
+var dn=R.v.slice(),tail=R.v.map(function(x){return x-12;}).filter(function(x){return x<0&&x>=lo;});dn=dn.concat(tail);
+var last=dn[dn.length-1];if(last<0&&last!==-12){rgRange(R.un,last+1,0).forEach(function(x){dn.push(x);});}
+segs.push(up.concat(R.a));segs.push(dn);return segs;}
+var asc=rgRange(R.as,lo,12),dsc=rgRange(R.vs,lo,12).reverse(),A=[],D=[];
+function grp(L,out,k){for(var i=0;i+k<=L.length;i++)out.push(L.slice(i,i+k));}
+if(pat==='p2'){grp(asc,A,2);grp(dsc,D,2);}else if(pat==='p3'){grp(asc,A,3);grp(dsc,D,3);}else if(pat==='p4'){grp(asc,A,4);grp(dsc,D,4);}
+else if(pat==='th'){for(var i=0;i+2<asc.length;i++)A.push([asc[i],asc[i+2]]);for(i=0;i+2<dsc.length;i++)D.push([dsc[i],dsc[i+2]]);D.push([dsc[dsc.length-2],dsc[dsc.length-1]]);}
+else if(pat==='nb'){for(i=0;i+1<asc.length;i++)A.push([asc[i],asc[i+1],asc[i]]);for(i=0;i+1<dsc.length;i++)D.push([dsc[i],dsc[i+1],dsc[i]]);D.push([dsc[dsc.length-1]]);}
+return A.concat(D);}
+// pick the octave of Sa that this harmonica plays best (fewest gaps, fewest bends)
+function rgFit(b,ps){var f={sc:0,bend:0,blow:0,miss:0};ps.forEach(function(p){var m=MAP[b+p];if(!m){f.miss++;f.sc-=150;return;}
+var bl=/'/.test(m.tok)&&m.tok.charAt(0)!=='-';if(/'/.test(m.tok)){if(bl)f.blow++;else f.bend++;}f.sc+=100-(bl?45:12)*m.cost;});return f;}
+function rgBase(ps){var s0=saHarp(),best=s0,bs=-1e9;[s0,s0-12,s0+12].forEach(function(b){var sc=rgFit(b,ps).sc+(b===s0?20:0);if(sc>bs){bs=sc;best=b;}});return best;}
+function rgOctLabels(ps){var s0=saHarp(),sel=document.getElementById('rgoct'),names={'-12':'Low','0':'Middle','12':'High'};
+function sum(b){var f=rgFit(b,ps),m=MAP[b],t=[];if(f.bend)t.push(f.bend+' draw bend'+(f.bend>1?'s':''));if(f.blow)t.push(f.blow+' blow bend'+(f.blow>1?'s':''));if(f.miss)t.push(f.miss+' missing');return (m?'hole '+T(m.tok):'off the harmonica')+(t.length?': '+t.join(', '):': all plain notes');}
+for(var i=0;i<sel.options.length;i++){var o=sel.options[i];if(o.value==='auto')o.textContent='Best fit ('+sum(rgBase(ps)).replace(/:.*/,'')+')';else o.textContent=names[o.value]+', '+sum(s0+(+o.value));}}
+function raagUI(){var R=rgCur(),pat=document.getElementById('rgpat').value,lo=RGR[document.getElementById('rgrng').value][0],segs=rgSeq(R,pat,lo);
+var flat=[];segs.forEach(function(s){flat=flat.concat(s);});var uniq=flat.filter(function(p,i){return flat.indexOf(p)===i;}).sort(function(a,b){return a-b;}),ov=document.getElementById('rgoct').value,base=ov==='auto'?rgBase(uniq):saHarp()+(+ov),key=KEYS[keySel.value];rgOctLabels(uniq);var ofs=base-saHarp();
+var aa=document.getElementById('rgaa');aa.innerHTML='';[['Aaroh',R.a],['Avroh',R.v]].forEach(function(q){var d=document.createElement('div'),b=document.createElement('b');b.textContent=q[0];d.appendChild(b);q[1].forEach(function(p){d.appendChild(swNode(p+ofs,true));});aa.appendChild(d);});
+var box=document.getElementById('rgnotes');box.innerHTML='';var bends=[],miss=[],slide=[],out=[],blow=0,ks=Object.keys(MAP).map(Number),lo0=Math.min.apply(null,ks),hi0=Math.max.apply(null,ks);
+uniq.forEach(function(p){var m=MAP[base+p],d=document.createElement('div');d.className='rgn'+(m?(/'/.test(m.tok)?' near':''):' bad');d.appendChild(swNode(p+ofs,true));
+var t=document.createElement('b');t.textContent=m?T(m.tok):'✗';d.appendChild(t);var s=document.createElement('small');s.textContent=nmW(base+p+key);d.appendChild(s);box.appendChild(d);
+var sn=swRel(p+ofs);if(!m){if(base+p<lo0||base+p>hi0)out.push(sn);else miss.push(sn);}else if(/'/.test(m.tok)){bends.push(sn+' '+T(m.tok));if(m.tok.charAt(0)!=='-')blow++;}else if(/</.test(m.tok))slide.push(sn+' '+T(m.tok));});
+var r=R.r,inf=r[2]+' thaat · '+r[3]+(r[4]?' · Carnatic: '+r[4]:'')+'. Sa = '+nmW(base+key)+(MAP[base]?' (hole '+T(MAP[base].tok)+')':'')+'.';
+if(bends.length)inf+=' Needs bends: '+bends.join(', ')+'.'+(blow?' Blow bends in the top holes are the hardest bends; a chromatic plays these swaras without bending.':'');
+if(slide.length)inf+=' With the slide button: '+slide.join(', ')+'.';
+if(out.length)inf+=' Outside the harmonica\'s range here: '+out.join(', ')+'. Try Sa in another octave.';
+if(miss.length)inf+=' Not on this harmonica in this octave: '+miss.join(', ')+' (needs an overblow). Try Sa in another octave, or a chromatic.';
+if(!bends.length&&!miss.length&&!out.length&&!slide.length)inf+=' Every swara is a plain blow or draw: no bends needed.';
+miss=miss.concat(out);
+document.getElementById('rginfo').textContent=inf;return {R:R,segs:segs,base:base,miss:miss};}
+function raagGo(){var U=raagUI(),pat=document.getElementById('rgpat').value,pd=RGP.filter(function(x){return x[0]===pat;})[0],b=pd[2],notes=[],beat=0,bpm=Math.max(30,Math.min(200,+document.getElementById('rgbpm').value||70));
+U.segs.forEach(function(seg){seg.forEach(function(p,i){var dur=1;if(i===seg.length-1){var used=(beat+1)%b;if(used)dur+=b-used;}
+var o={t:Math.round(beat*480),n:U.base+p,d:Math.round(dur*480)};if(NOTA.mode==='w')o.lyr=swRel(p+U.base-saHarp());notes.push(o);beat+=dur;});});
+if(playing)stopPlay();if(perfOn)stopPerform(true);if(replaying)stopReplay();if(waitOn)stopWait();
+keySel.value=document.getElementById('pkey').value;shSel.value=String(KEYS[keySel.value]);
+document.getElementById('cho').checked=false;document.getElementById('bpm').value=String(bpm);bpb=b;document.getElementById('ts').value=String(b);
+audioNotes=[];ppq=480;var name='Raag '+U.R.r[1]+' · '+pd[1].split(':')[0].replace('Aaroh–avroh','aaroh–avroh').toLowerCase();
+parts=[{name:name,ch:0,notes:notes,drum:false,kind:'raag'}];
+trSel.innerHTML='';var op=document.createElement('option');op.value=0;op.textContent=name;trSel.appendChild(op);
+document.getElementById('opts').hidden=false;document.getElementById('low').value='0';undoSt=[];sel=null;
+document.getElementById('psum').textContent='';document.getElementById('pstat').textContent='';document.getElementById('perf').hidden=true;
+if(NOTA.mode!=='w')document.getElementById('nn').checked=true;
+render();showView('player');toast(U.miss.length?'Some swaras are not playable with Sa at this hole. Check the ? or octave-moved notes in the tabs.':'Tip: Play & wait waits for each swara. Turn on the tanpura for riyaz.');}
+document.getElementById('rggo').addEventListener('click',raagGo);
+document.getElementById('rgtp').addEventListener('click',function(){if(!TP.on){var R=rgCur(),f=document.getElementById('tpfirst');if(!R.un[7]&&f.value==='P')f.value='M';else if(R.un[7]&&f.value==='M')f.value='P';}tpToggle();});
+
+// keep everything in step with the harmonica, key and Sa
+function riyazRefresh(){try{tpUI();bendList();raagUI();}catch(e){}}
+['inst','pinst','pkey','key','sasel','swl'].forEach(function(id){var e=document.getElementById(id);if(e)e.addEventListener('change',function(){setTimeout(riyazRefresh,0);});});
+document.querySelectorAll('select.nota').forEach(function(e){e.addEventListener('change',function(){setTimeout(riyazRefresh,0);});});
+riyazRefresh();
 })();
 </script>
 <script>
 (function(){
-var APP_VERSION='3.13';
+var APP_VERSION='3.14';
 document.getElementById('vnum').textContent=APP_VERSION;
 var upd=document.getElementById('upd'),vst=document.getElementById('vst');
 function hardUpdate(){

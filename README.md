@@ -62,3 +62,9 @@ Change the version number in three places: `APP_VERSION` in index.html, `VERSION
 
 ### New in 3.13
 - Each harmonica type remembers its own key. Example: Special 20 in B, Easttop T10-40 in C and EAP-12 in C. Switch type and the key follows. Chromatics start in C.
+
+### New in 3.14: riyaz tools
+- **Raag & alankar practice** (Learn): 14 raags (Bilawal, Yaman, Bhupali, Hamsadhwani, Durga, Khamaj, Desh, Kafi, Bhimpalasi, Bhairav, Bhairavi, Asavari, Todi, Malkauns) with Carnatic names. Patterns: aaroh–avroh, pairs, groups of 3 and 4, leaps of a third, turns. Range: madhya, from mandra Pa, or two octaves. Shows every swara as a tab on your harmonica (amber = bend, red = not available), lets you choose which hole Sa sits on, and opens the practice in the player.
+- **Tanpura drone** (Free play): tuned to your harmonica's Sa, first string Pa / Ma / Ni / Sa, three pitches, three pluck speeds, volume. Keeps playing in other screens with a small Stop button.
+- **Long-note timer** (Free play): while listening, times how long you hold a note within 20 cents, with your record.
+- **Bend trainer** (Free play, diatonic): every bend on your harp, a reference tone, a meter from the unbent note to the target, a green zone to hold, clean-bend count and longest hold per bend.
