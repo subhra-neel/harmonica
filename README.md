@@ -68,3 +68,9 @@ Change the version number in three places: `APP_VERSION` in index.html, `VERSION
 - **Tanpura drone** (Free play): tuned to your harmonica's Sa, first string Pa / Ma / Ni / Sa, three pitches, three pluck speeds, volume. Keeps playing in other screens with a small Stop button.
 - **Long-note timer** (Free play): while listening, times how long you hold a note within 20 cents, with your record.
 - **Bend trainer** (Free play, diatonic): every bend on your harp, a reference tone, a meter from the unbent note to the target, a green zone to hold, clean-bend count and longest hold per bend.
+
+### New in 4.0: a Yousician-style redesign
+- **Home is a lesson path**: levels with lesson circles, 0–3 stars on each, the next lesson glowing with START. At the top: day streak, today's practice minutes against your daily goal, and total stars. Tap a lesson for its card: Learn the notes, Play for stars, or Listen first.
+- **New play screen** for lessons, raags and songs: notes slide toward a play line (blue = blow, orange = draw, pink = bend, purple = chord), turn green or red as you play, and the harmonica strip lights the hole with "Breathe in/out · hole 4". Three modes: 👂 Listen, 🐢 Learn (waits for each note) and 🎤 Play (in time, scored). Count-in, "Perfect!/Great" feedback with streaks, live stars, and a results card with stars, notes hit, pitch, timing and steadiness. Speed, tanpura and options (loop, metronome, section, tab sheet, save) sit under the play button.
+- **Four tabs**: Home, Songs (My songs first, then tiles to add a song), Practice (tiles for Raag & alankar, Tanpura riyaz, Bend trainer, Free play) and Me (progress, daily goal, harmonica and settings).
+- The full tab sheet and editor are still there: ⋯ → Tab sheet & editor on the play screen.
