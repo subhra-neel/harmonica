@@ -74,3 +74,10 @@ Change the version number in three places: `APP_VERSION` in index.html, `VERSION
 - **New play screen** for lessons, raags and songs: notes slide toward a play line (blue = blow, orange = draw, pink = bend, purple = chord), turn green or red as you play, and the harmonica strip lights the hole with "Breathe in/out · hole 4". Three modes: 👂 Listen, 🐢 Learn (waits for each note) and 🎤 Play (in time, scored). Count-in, "Perfect!/Great" feedback with streaks, live stars, and a results card with stars, notes hit, pitch, timing and steadiness. Speed, tanpura and options (loop, metronome, section, tab sheet, save) sit under the play button.
 - **Four tabs**: Home, Songs (My songs first, then tiles to add a song), Practice (tiles for Raag & alankar, Tanpura riyaz, Bend trainer, Free play) and Me (progress, daily goal, harmonica and settings).
 - The full tab sheet and editor are still there: ⋯ → Tab sheet & editor on the play screen.
+
+### New in 4.1: more drills and lessons
+- 35 new lessons on the path (39 diatonic, 29 chromatic), each tagged Drill, Song, Chords or Skill.
+- Drills: long notes for tone, moving between holes, quarter/eighth-note rhythm, tonguing, scale in thirds, train-rhythm chord chugging, chord/single-note switching, low holes, the full low octave with bends, half-step bends in rhythm, bend wobble (vibrato), thirds at speed, the high octave (holes 7–10), arpeggios, and on chromatic: slide half steps, D major, the upper chromatic scale.
+- Sargam alankars in the path: Sa Re Ga / Re Ga Ma … (3/4) and Sa Re Ga Ma / Re Ga Ma Pa …
+- New songs (public domain): Hot Cross Buns, Jingle Bells, When the Saints Go Marching In, Amazing Grace, and Ode to Joy in D on chromatic.
+- New tips for tone, rhythm, tonguing, alankars, vibrato, low and high holes and arpeggios. Chromatic lessons stay within holes 1–10 so they fit the 10-hole too.

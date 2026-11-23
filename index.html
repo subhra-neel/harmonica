@@ -332,7 +332,7 @@ button.node.some{border-color:var(--warn)}
 button.node.done{background:var(--ok);border-color:var(--ok);color:#fff;font-size:1.5rem;box-shadow:0 5px 0 color-mix(in srgb,var(--ok) 55%,#000)}
 button.node.next{width:86px;height:86px;background:var(--ac);border-color:var(--ac);color:#fff;font-size:1.2rem;box-shadow:0 6px 0 color-mix(in srgb,var(--ac) 55%,#000);animation:npulse 1.8s ease-in-out infinite}
 @keyframes npulse{0%,100%{box-shadow:0 6px 0 color-mix(in srgb,var(--ac) 55%,#000),0 0 0 4px var(--soft)}50%{box-shadow:0 6px 0 color-mix(in srgb,var(--ac) 55%,#000),0 0 0 16px transparent}}
-.nlab{margin-top:8px;text-align:center;max-width:180px;line-height:1.25}.nlab b{display:block;font-size:.86rem}.nlab .nst{font-size:.9rem;color:var(--warn);letter-spacing:2px}.nlab .nstart{display:block;margin-top:2px;font-size:.7rem;font-weight:900;letter-spacing:.12em;color:var(--ac)}
+.nlab{margin-top:8px;text-align:center;max-width:180px;line-height:1.25;background:var(--bg);border-radius:12px;padding:3px 8px 4px}.ntag{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:1px 7px;border-radius:999px;margin-bottom:3px;background:var(--soft);color:var(--ac)}.ntag.song{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}.ntag.chords{background:color-mix(in srgb,#7b4fe0 16%,transparent);color:#7b4fe0}.ntag.skill{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}.nlab b{display:block;font-size:.86rem}.nlab .nst{font-size:.9rem;color:var(--warn);letter-spacing:2px}.nlab .nstart{display:block;margin-top:2px;font-size:.7rem;font-weight:900;letter-spacing:.12em;color:var(--ac)}
 .hmore{margin-top:22px}.hmore .tiles{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
 button.mtile{display:flex;align-items:center;gap:10px;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:14px;padding:12px;text-align:left}.mtile .ti{font-size:1.4rem}.mtile b{font-size:.9rem}
 /* bottom sheets */
@@ -1310,37 +1310,72 @@ requestAnimationFrame(loopf);})();
 // ---- Practice program: exercises, progress, live performance analysis
 var EX=[
 ['d1a',1,'d','Blow and draw, hole 4','single notes',60,'4 -4 4 -4 4 -4 4 -4'],
-['d1b',1,'d','C major scale','single notes',60,'4 -4 5 -5 6 -6 -7 7'],
+['d1d',1,'d','Long notes: hold each note steady','single notes, tone, drill',60,'4:4 -4:4 5:4 -5:4 6:4'],
+['d1e',1,'d','Moving between holes 4, 5 and 6','single notes, drill',70,'4 5 6 5 4 5 6:2 -4 -5 -6 -5 -4 -5 -6:2'],
+['d1b',1,'d','C major scale (Sa Re Ga Ma)','single notes',60,'4 -4 5 -5 6 -6 -7 7'],
+['d1f',1,'d','Rhythm: quarter and eighth notes','single notes, rhythm, drill',70,'4 4 4:0.5 4:0.5 4 -4 -4 -4:0.5 -4:0.5 -4 5 5:0.5 5:0.5 5 5:0.5 5:0.5 4:4'],
+['d1g',1,'d','Hot cross buns','melody',70,'5 -4 4:2 5 -4 4:2 4:0.5 4:0.5 4:0.5 4:0.5 -4:0.5 -4:0.5 -4:0.5 -4:0.5 5 -4 4:2'],
 ['d1c',1,'d','Mary had a little lamb','melody',70,'5 -4 4 -4 5 5 5:2 -4 -4 -4:2 5 6 6:2'],
 ['d2a',2,'d','Ode to Joy','melody',80,'5 5 -5 6 6 -5 5 -4 4 4 -4 5 5:1.5 -4:0.5 -4:2'],
+['d2e',2,'d','Scale in thirds','single notes, drill',70,'4 5 -4 -5 5 6 -5 -6 6 -7 -6 7 7 -6 -7 6 -6 -5 6 5 -5 -4 5 4'],
 ['d2b',2,'d','Twinkle, twinkle','melody',80,'4 4 6 6 -6 -6 6:2 -5 -5 5 5 -4 -4 4:2'],
+['d2f',2,'d','Tonguing: ta-ta-ta repeated notes','single notes, articulation, drill',80,'4:0.5 4:0.5 4:0.5 4:0.5 4:2 -4:0.5 -4:0.5 -4:0.5 -4:0.5 -4:2 5:0.5 5:0.5 5:0.5 5:0.5 5:2 4:4'],
+['d2i',2,'d','Alankar: Sa Re Ga, Re Ga Ma …','single notes, alankar, drill',70,'4 -4 5 -4 5 -5 5 -5 6 -5 6 -6 6 -6 -7 -6 -7 7 7 -7 -6 -7 -6 6 -6 6 -5 6 -5 5 -5 5 -4 5 -4 4',3],
+['d2g',2,'d','Jingle Bells (chorus)','melody',100,'5 5 5:2 5 5 5:2 5 6 4:1.5 -4:0.5 5:4 -5 -5 -5:1.5 -5:0.5 -5 5 5 5:0.5 5:0.5 5 -4 -4 5 -4:2 6:2'],
 ['d2c',2,'d','Two chords: C and G','chords',60,'[1.2.3]:2 [-2.3.4]:2 [1.2.3]:2 [-2.3.4]:2'],
+['d2h',2,'d','Train rhythm: chugging chords','chords, rhythm, drill',80,'[1.2.3]:0.5 [1.2.3]:0.5 [-1.2.3]:0.5 [-1.2.3]:0.5 [1.2.3]:0.5 [1.2.3]:0.5 [-1.2.3]:0.5 [-1.2.3]:0.5 [1.2.3]:0.5 [1.2.3]:0.5 [-1.2.3]:0.5 [-1.2.3]:0.5 [1.2.3]:0.5 [1.2.3]:0.5 [-1.2.3]:0.5 [-1.2.3]:0.5 [1.2.3]:0.5 [1.2.3]:0.5 [-1.2.3]:0.5 [-1.2.3]:0.5 [1.2.3]:0.5 [1.2.3]:0.5 [-1.2.3]:0.5 [-1.2.3]:0.5 [1.2.3]:4'],
 ['d2d',2,'d','Waltz rhythm: oom-pah-pah (3/4)','chords, 3/4 time',80,'[1.2.3] [-2.3.4] [-2.3.4] [1.2.3] [-2.3.4] [-2.3.4] [1.2.3] [-2.3.4] [-2.3.4] [1.2.3]:3',3],
+['d3e',3,'d','Low holes 1 to 4','single notes, low, drill',70,'1 -1 2 -2 -3 4 -3 -2 2 -1 1:2'],
 ['d3a',3,'d','First bend: draw 4','bends',60,"-4 -4' -4 -4' -4 -4'"],
+['d3f',3,'d','Half-step bends in rhythm','bends, drill',60,"-4 -4' 4:2 -4 -4' 4:2 -1 -1' 1:2 -1 -1' 1:2"],
 ['d3b',3,'d','Draw 2 bends','bends',60,"-2 -2' -2'' -2' -2"],
+['d3i',3,'d','Alankar: Sa Re Ga Ma, Re Ga Ma Pa …','single notes, alankar, drill',70,'4 -4 5 -5 -4 5 -5 6 5 -5 6 -6 -5 6 -6 -7 6 -6 -7 7 7 -7 -6 6 -7 -6 6 -5 -6 6 -5 5 6 -5 5 -4 -5 5 -4 4'],
+['d3g',3,'d','When the Saints Go Marching In','melody',100,'4 5 -5 6:4 4 5 -5 6:4 4 5 -5 6:2 5:2 4:2 5:2 -4:4 5 5 -4 4:3 4 5:2 6:2 6 -5:3 5 -5 6:2 5:2 4:2 -4:2 4:4'],
 ['d3c',3,'d','Chord changes: low C, high C, G','chords',70,'[1.2.3]:2 [4.5.6]:2 [-2.3.4]:2 [1.2.3]:2'],
+['d3h',3,'d','Switch: chord, then single note','chords, single notes, drill',70,'[4.5.6] 4 [-4.5.6] -4 [4.5.6] 5 [-4.5.6] -5 [4.5.6]:2 6:2'],
 ['d3d',3,'d','Draw chords: G then Dm','chords',60,'[-2.3.4]:2 [-4.5.6]:2 [-2.3.4]:2 [-4.5.6]:2'],
 ['d4a',4,'d','Bend ladder: draw 3','bends',60,"-3 -3' -3'' -3''' -3'' -3' -3"],
+['d4e',4,'d','Full low-octave scale (with bends)','bends, low, drill',70,"1 -1 2 -2'' -2 -3'' -3 4:2 4 -3 -3'' -2 -2'' 2 -1 1:2"],
+['d4f',4,'d','Amazing Grace','melody, bends, 3/4 time',70,"3 4:2 5:0.5 4:0.5 5:2 -4 4:2 -3'' 3:2 3 4:2 5:0.5 4:0.5 5:2 -4 6:3",3],
+['d4h',4,'d','Bend wobble: draw 4 vibrato','bends, vibrato, drill',70,"-4:0.5 -4':0.5 -4:0.5 -4':0.5 -4:0.5 -4':0.5 -4:0.5 -4':0.5 -4:4"],
 ['d4b',4,'d','Blues scale, 2nd position','bends, blues',70,"-2 -3' 4 -4' -4 -5 6"],
+['d4g',4,'d','Thirds at speed','speed, drill',100,'4 5 -4 -5 5 6 -5 -6 6 -7 -6 7 7 -6 -7 6 -6 -5 6 5 -5 -4 5 4'],
 ['d4c',4,'d','Fast alternation','speed',90,'4 -4 4 -4 5 -5 5 -5 6 -6 6 -6'],
 ['d4d',4,'d','Progression: C, G, Dm, C','progression',60,'[1.2.3]:2 [-2.3.4]:2 [-4.5.6]:2 [1.2.3]:2'],
 ['d5a',5,'d','High bends: draw 6, blow 8 and 9','bends',60,"-6 -6' -6 8 8' 8 9 9' 9"],
+['d5e',5,'d','High octave scale, holes 7 to 10','bends, high, drill',80,"7 -8 8 -9 9 -10 10' 10:2 10 10' -10 9 -9 8 -8 7:2"],
 ['d5b',5,'d','Blues lick with bends','bends, blues',80,"-2 -3' -3 -2 4:2 -4' -4 -3'' -3' -3:2"],
+['d5f',5,'d','Arpeggios: C and G7 across the harp','speed, arpeggio, drill',100,'1 2 3 4 5 6 7 8 9 10:2 9 8 7 6 5 4 3 2 1:2 -1 -2 -3 -4 -5 -4 -3 -2 -1:2'],
 ['d5c',5,'d','Progression with single-note fills','progression',80,'[1.2.3] 4 5 6 [-2.3.4] -4 -5 -4 [-4.5.6] 6 5 -4 [1.2.3]:2'],
 ['d5d',5,'d','Speed run: C major scale','speed',110,'4 -4 5 -5 6 -6 -7 7 -7 -6 6 -5 5 -4 4'],
 ['c1a',1,'c','Open scale, C major','no slide',60,'1 -1 2 -2 3 -3 -4 4'],
+['c1c',1,'c','Long notes: hold each note steady','no slide, tone, drill',60,'1:4 -1:4 2:4 -2:4 3:4'],
+['c1e',1,'c','Rhythm: quarter and eighth notes','no slide, rhythm, drill',70,'1 1 1:0.5 1:0.5 1 -1 -1 -1:0.5 -1:0.5 -1 2 2:0.5 2:0.5 2 2:0.5 2:0.5 1:4'],
+['c1d',1,'c','Hot cross buns','melody',70,'2 -1 1:2 2 -1 1:2 1:0.5 1:0.5 1:0.5 1:0.5 -1:0.5 -1:0.5 -1:0.5 -1:0.5 2 -1 1:2'],
 ['c1b',1,'c','Mary had a little lamb','melody',70,'2 -1 1 -1 2 2 2:2 -1 -1 -1:2 2 3 3:2'],
 ['c2a',2,'c','First slide: sharps','slide',60,'1 1< 1 1< -1 -1< -1 -1<'],
+['c2e',2,'c','Scale in thirds','no slide, drill',70,'1 2 -1 -2 2 3 -2 -3 3 -4 -3 4 4 -3 -4 3 -3 -2 3 2 -2 -1 2 1'],
 ['c2b',2,'c','Ode to Joy','melody',80,'2 2 -2 3 3 -2 2 -1 1 1 -1 2 2:1.5 -1:0.5 -1:2'],
+['c2g',2,'c','Alankar: Sa Re Ga, Re Ga Ma …','no slide, alankar, drill',70,'1 -1 2 -1 2 -2 2 -2 3 -2 3 -3 3 -3 -4 -3 -4 4 4 -4 -3 -4 -3 3 -3 3 -2 3 -2 2 -2 2 -1 2 -1 1',3],
+['c2f',2,'c','Jingle Bells (chorus)','melody',100,'2 2 2:2 2 2 2:2 2 3 1:1.5 -1:0.5 2:4 -2 -2 -2:1.5 -2:0.5 -2 2 2 2:0.5 2:0.5 2 -1 -1 2 -1:2 3:2'],
 ['c2c',2,'c','Two chords: C and G','chords',60,'[1.2.3]:2 [-2.3.4]:2 [1.2.3]:2 [-2.3.4]:2'],
 ['c2d',2,'c','Waltz rhythm: oom-pah-pah (3/4)','chords, 3/4 time',80,'[1.2.3] [-2.3.4] [-2.3.4] [1.2.3] [-2.3.4] [-2.3.4] [1.2.3] [-2.3.4] [-2.3.4] [1.2.3]:3',3],
 ['c3a',3,'c','Chromatic scale up','slide',60,'1 1< -1 -1< 2 -2 -2< 3 3< -3 -3< -4 4'],
+['c3c',3,'c','Slide half steps: F to C','slide, drill',60,'-2 -2< 3 3< -3 -3< -4 4:2 4 -4 -3< -3 3< 3 -2< -2:2'],
 ['c3b',3,'c','G major scale (F sharp)','slide',70,'3 -3 -4 4 -5 6 -6< 7'],
+['c3e',3,'c','Alankar: Sa Re Ga Ma, Re Ga Ma Pa …','no slide, alankar, drill',70,'1 -1 2 -2 -1 2 -2 3 2 -2 3 -3 -2 3 -3 -4 3 -3 -4 4 4 -4 -3 3 -4 -3 3 -2 -3 3 -2 2 3 -2 2 -1 -2 2 -1 1'],
+['c3d',3,'c','When the Saints Go Marching In','melody',100,'1 2 -2 3:4 1 2 -2 3:4 1 2 -2 3:2 2:2 1:2 2:2 -1:4 2 2 -1 1:3 1 2:2 3:2 3 -2:3 2 -2 3:2 2:2 1:2 -1:2 1:4'],
 ['c4a',4,'c','Chromatic run, two octaves','slide',80,'1 1< -1 -1< 2 -2 -2< 3 3< -3 -3< -4 4 4< -5 -5< 6 -6 -6< 7'],
+['c4e',4,'c','D major scale (two sharps)','slide, drill',70,'-1 2 -2< 3 -3 -4 4< -5:2 -5 4< -4 -3 3 -2< 2 -1:2'],
+['c4f',4,'c','Ode to Joy in D','melody, slide',80,'-2< -2< 3 -3 -3 3 -2< 2 -1 -1 2 -2< -2<:1.5 2:0.5 2:2'],
 ['c4b',4,'c','Chord changes: C, Dm, G, C','chords',70,'[1.2.3]:2 [-1.2.3]:2 [-2.3.4]:2 [1.2.3]:2'],
+['c4d',4,'c','Amazing Grace','melody, 3/4 time',70,'3 4:2 6:0.5 4:0.5 6:2 -5 4:2 -3 3:2 3 4:2 6:0.5 4:0.5 6:2 -5 7:3',3],
+['c4g',4,'c','Thirds at speed','speed, drill',100,'1 2 -1 -2 2 3 -2 -3 3 -4 -3 4 4 -3 -4 3 -3 -2 3 2 -2 -1 2 1'],
 ['c4c',4,'c','Octave jumps with slide','slide',80,'1 4 1< 4< -1 -5 -1< -5<'],
 ['c5a',5,'c','Fast chromatic scale','speed',110,'1 1< -1 -1< 2 -2 -2< 3 3< -3 -3< -4 4 -4 -3< -3 3< 3 -2< -2 2 -1< -1 1< 1'],
+['c5d',5,'c','Chromatic scale down, upper octave','slide, speed, drill',100,'8 -8 -7< -7 7< 7 -6< -6 6 -5< -5 5< 5:2'],
 ['c5b',5,'c','Progression: Dm, G, C','progression',80,'[-1.2.3]:2 [-2.3.4]:2 [1.2.3]:2'],
+['c5e',5,'c','Arpeggios: C and G7 over two octaves','speed, arpeggio, drill',100,'1 2 3 5 6 7 8:2 7 6 5 3 2 1:2 3 -4 -5 -6 7 -8 -9:2 -8 7 -6 -5 -4 3:2'],
 ['c5c',5,'c','Slide mastery: in and out','slide',100,'3 3< 3 3< -3 -3< -3 -3< 1 1< 1 1<']
 ];
 var PK='harmonica-progress-v1',LV=['Beginner','Elementary','Intermediate','Advanced','Master'],lvSel=1,perfOn=false,perf=null,TT={};
@@ -2120,7 +2155,15 @@ var TIPS=[
 [/no slide/,'Keep the slide button out for this whole lesson.'],
 [/^slide/,'Notes marked < need the slide button pushed fully in. Press and release it crisply while your breath stays steady.'],
 [/speed/,'Start with Speed at 60% and turn on Speed trainer: it raises the speed each loop and after every Perform of 90% or better.'],
-[/3\/4/,'Count 1-2-3. Beat 1 is the strong "oom", beats 2 and 3 are the lighter "pah-pah".']];
+[/3\/4/,'Count 1-2-3. Beat 1 is the strong "oom", beats 2 and 3 are the lighter "pah-pah".'],
+[/tone/,'Breathe slowly from your belly and keep the note steady from start to end, with no wobble. The long-note timer in Practice → Tanpura riyaz shows how long you hold it.'],
+[/rhythm/,'Tap your foot on every beat. Eighth notes are two per tap: count "1-and-2-and". Turn on the metronome in ⋯.'],
+[/articulation/,'Repeat a note by saying "ta" or "da" into the hole. Keep the breath flowing; only your tongue moves.'],
+[/alankar/,'Say the sargam as you play: Sa Re Ga, Re Ga Ma … Each group starts one swara higher, then the pattern comes back down. Keep every note the same length.'],
+[/vibrato/,'Rock evenly between the plain note and the bend, like a slow wobble. This is the start of bend vibrato.'],
+[/low/,'Low holes need a relaxed, open throat and slow air. Keep the pucker small so only one hole sounds.'],
+[/high/,'High holes need very little air. Blow bends in holes 8 to 10: aim the air at the back of your lower teeth.'],
+[/arpeggio/,'Glide the harmonica smoothly in one direction and keep the breath going. Only the holes change.']];
 function exTip(ex){var out=[];TIPS.forEach(function(t){if(t[0].test(ex[4])&&out.indexOf(t[1])<0)out.push(t[1]);});return out.slice(0,2).join(' ');}
 function nextEx(ex){var list=EX.filter(function(e){return e[2]===ex[2];}),i=list.indexOf(ex);return i>=0?list[i+1]||null:null;}
 function updHead(){
@@ -2955,7 +2998,7 @@ hEl('span','lvn','Level '+(li+1),hd);hEl('b',null,name,hd);hEl('em',null,'★ '+
 L.forEach(function(e,j){var r=P.ex[e[0]]||{},s=r.stars||0,row=hEl('div','nrow',null,path);row.style.setProperty('--x',Math.round(zz[k++%8]*amp)+'px');
 var b=hBtn(s>=2?'✓':(li+1)+'.'+(j+1),'node'+(s>=2?' done':s>0?' some':'')+(e===nx?' next':''),function(){lessonSheet(e);},row);
 b.setAttribute('aria-label','Lesson '+(li+1)+'.'+(j+1)+': '+e[3]+', '+s+' of 3 stars'+(e===nx?', up next':''));
-var lab=hEl('div','nlab',null,row);hEl('b',null,e[3],lab);hEl('span','nst',starTxt(s),lab);if(e===nx)hEl('span','nstart','START',lab);});});
+var lab=hEl('div','nlab',null,row),tg=exTag(e);hEl('span','ntag '+tg.toLowerCase(),tg,lab);hEl('b',null,e[3],lab);hEl('span','nst',starTxt(s),lab);if(e===nx)hEl('span','nstart','START',lab);});});
 var more=document.getElementById('hmore');more.innerHTML='';
 [['raag','🕉','Raag & alankar'],['riyaz','🪕','Tanpura riyaz'],['bend','🎯','Bend trainer'],['free','🎧','Free play & tuner']].forEach(function(t){if(t[0]==='bend'&&MAP===CHR)return;var b=hBtn('','mtile',function(){goPractice(t[0]);},more);hEl('span','ti',t[1],b);hEl('b',null,t[2],b);});
 requestAnimationFrame(drawPathLine);}
@@ -2965,9 +3008,10 @@ if(pts.length<2)return;var ns='http://www.w3.org/2000/svg',svg=document.createEl
 var d='M'+pts[0][0]+' '+pts[0][1];for(var i=1;i<pts.length;i++){var a=pts[i-1],c=pts[i],my=Math.round((a[1]+c[1])/2);d+=' C'+a[0]+' '+my+' '+c[0]+' '+my+' '+c[0]+' '+c[1];}
 var p=document.createElementNS(ns,'path');p.setAttribute('d',d);svg.appendChild(p);path.insertBefore(svg,path.firstChild);}
 var hwRz=null;window.addEventListener('resize',function(){clearTimeout(hwRz);hwRz=setTimeout(function(){if(curView==='home'&&!ST.open)renderHome();},150);});
+function exTag(e){return /drill/.test(e[4])?'Drill':/melody/.test(e[4])?'Song':/chord|progression/.test(e[4])?'Chords':'Skill';}
 function lessonSheet(e){var P=lp(),r=P.ex[e[0]]||{},s=r.stars||0,c=document.getElementById('lshc');c.innerHTML='';
-hEl('div','lsh-lv','Level '+e[1]+' · '+LV[e[1]-1]+' · Lesson '+lessonNo(e),c);hEl('h3',null,e[3],c).id='lsht';hEl('div','lsh-st',starTxt(s),c);
-hEl('div','lsh-meta',e[4]+' · '+e[5]+' BPM'+(r.best?' · best '+r.best+'%':'')+(r.att?' · '+r.att+' tr'+(r.att===1?'y':'ies'):''),c);
+hEl('div','lsh-lv','Level '+e[1]+' · '+LV[e[1]-1]+' · Lesson '+lessonNo(e)+' · '+exTag(e),c);hEl('h3',null,e[3],c).id='lsht';hEl('div','lsh-st',starTxt(s),c);
+hEl('div','lsh-meta',e[4].replace(/,? ?drill/,'')+' · '+e[5]+' BPM'+(r.best?' · best '+r.best+'%':'')+(r.att?' · '+r.att+' tr'+(r.att===1?'y':'ies'):''),c);
 var tip=exTip(e);if(tip)hEl('div','lsh-tip',tip,c);
 hEl('div','lsh-goal',s>=2?'Passed. Score 92% or more for ★★★.':'Score 80% or more in 🎤 Play to pass with ★★.',c);
 var bs=hEl('div','lsh-btns',null,c);
@@ -3165,7 +3209,7 @@ renderHome();
 </script>
 <script>
 (function(){
-var APP_VERSION='4.0';
+var APP_VERSION='4.1';
 document.getElementById('vnum').textContent=APP_VERSION;
 var upd=document.getElementById('upd'),vst=document.getElementById('vst');
 function hardUpdate(){
